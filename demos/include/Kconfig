@@ -1,0 +1,42 @@
+choice TARGET_BOARD
+    bool "Select the target board"
+    
+    config ESP32
+        bool "Espressif ESP32"
+
+    config nrf52840-df
+        bool "Nordic nrf52840-dk"      
+endchoice
+
+menu "Device configuration"
+
+config WIFI_SSID
+    string "WiFi SSID"
+    help
+        The SSID of your wifi router.
+
+config WIFI_PASSWORD
+    string "WiFi password"
+    help
+        The password of your wifi router.
+
+config WIFI_SECURITY
+    string "WiFi security"
+    help
+        The security type of your Wi-Fi network
+
+endmenu
+
+menu "AWS configuration"
+
+config IOT_ENDPOINT
+    string "AWS IoT endpoint"
+    help
+        The endpoint associated with your aws account.
+
+config THING_NAME
+    string "Thing name"
+    help
+        The thing name associated with your device.
+
+endmenu

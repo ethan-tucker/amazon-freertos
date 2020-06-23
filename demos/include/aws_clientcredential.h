@@ -26,12 +26,13 @@
 #ifndef __AWS_CLIENTCREDENTIAL__H__
 #define __AWS_CLIENTCREDENTIAL__H__
 
+#include ".config"
 /*
  * @brief MQTT Broker endpoint.
  *
  * @todo Set this to the fully-qualified DNS name of your MQTT broker.
  */
-#define clientcredentialMQTT_BROKER_ENDPOINT         ""
+#define clientcredentialMQTT_BROKER_ENDPOINT         CONFIG_WIFI_SSID
 
 /*
  * @brief Host name.
