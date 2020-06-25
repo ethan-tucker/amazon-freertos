@@ -99,6 +99,8 @@ endif()
 # Do not prefix the output library file.
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
+# Include kconfig configuration file
+include_directories("${CMAKE_BINARY_DIR}/kconfig")
 
 # Initialize all modules.
 add_subdirectory("libraries")

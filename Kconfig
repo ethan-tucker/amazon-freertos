@@ -1,14 +1,22 @@
 choice TARGET_BOARD
     bool "Select the target board"
-    
+
     config ESP32
         bool "Espressif ESP32"
 
-    config nrf52840-df
-        bool "Nordic nrf52840-dk"      
+    config pc
+        bool "Windows Device Simulator"
+    if pc
+        config NETWORK_INTERFACE
+        int "Network Interface to use"
+            default 0
+            help 
+                Only ethernet interfaces are supported by default.
+    endif
+
 endchoice
 
-menu "Device configuration"
+menu "WiFi configuration"
 
 config WIFI_SSID
     string "WiFi SSID"
@@ -40,3 +48,14 @@ config THING_NAME
         The thing name associated with your device.
 
 endmenu
+
+choice "Demo Selection"
+    bool "Select a demo to enable"
+    
+    config MQTT_DEMO_ENABLED
+        bool "MQTT demo"
+
+    config SHADOW_DEMO_ENABLED
+        bool "Shadow demo"
+
+endchoice

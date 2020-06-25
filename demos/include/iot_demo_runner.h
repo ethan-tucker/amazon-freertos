@@ -27,6 +27,8 @@
 #define _IOT_DEMO_RUNNER_H_
 
 #include "aws_demo_config.h"
+#include "config.h"
+
 
 /*  By design only one demo can be selected at a time. If
  *  you choose more than one only the first choice will be run. If you require
