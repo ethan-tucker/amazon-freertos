@@ -1,0 +1,116 @@
+if BOARD_ecc608a_plus_winsim
+    config STACK_SIZE_ecc608a_plus_winsim
+        int "Stack size"
+        default 630
+        depends on !STACK_SIZE_SET_DEMO
+
+    config LOG2_FILE_BLOCK_SIZE_ecc608a_plus_winsim
+        int "Log 2 file block size"
+        default 10
+        depends on !LOG2_FILE_BLOCK_SIZE_SET_DEMO
+
+    config SELF_TEST_RESPONSE_WAIT_MS_ecc608a_plus_winsim
+        int "Self test response wait (milliseconds)"
+        default 16000
+        depends on !SELF_TEST_RESPONSE_WAIT_MS_SET_DEMO
+
+    config FILE_REQUEST_WAIT_MS_ecc608a_plus_winsim
+        int "File request wait (milliseconds)"
+        default 2500
+        depends on !FILE_REQUEST_WAIT_MS_SET_DEMO
+
+    config OTA_AGENT_PRIORITY_ecc608a_plus_winsim
+        int "OTA agent priority"
+        default 0
+        help
+            0 is the lowest priority.
+        depends on !OTA_AGENT_PRIORITY_SET_DEMO
+
+    config MAX_THINGNAME_LEN_ecc608a_plus_winsim
+        int "Max thingname length"
+        default 64
+        depends on !MAX_THINGNAME_LEN_SET_DEMO
+
+    config MAX_NUM_BLOCKS_REQUEST_ecc608a_plus_winsim
+        int "Max num of blocks requested"
+        default 128
+        depends on !MAX_NUM_BLOCKS_REQUEST_SET_DEMO
+
+    config MAX_NUM_REQUEST_MOMENTUM_ecc608a_plus_winsim
+        int "Max num request momentum"
+        default 32
+        depends on !MAX_NUM_REQUEST_MOMENTUM_SET_DEMO
+
+    config MAX_NUM_OTA_DATA_BUFFERS_ecc608a_plus_winsim
+        int "Max num OTA data buffers"
+        default 4
+        depends on !MAX_NUM_OTA_DATA_BUFFERS_SET_DEMO
+
+    config ALLOW_DOWNGRADE_ecc608a_plus_winsim
+        bool "Allow downgrades"
+        default 0
+        depends on !ALLOW_DOWNGRADE_SET_DEMO
+
+    if !ENABLED_CONTROL_PROTOCOLS_SET_DEMO
+    choice ENABLED_CONTROL_PROTOCOLS_ecc608a_plus_winsim
+        bool "Enabled control protocols"
+
+        config ENABLED_CONTROL_PROTOCOLS_MQTT_ecc608a_plus_winsim
+            bool "OTA data over MQTT"
+
+        config ENABLED_CONTROL_PROTOCOLS_HTTP_ecc608a_plus_winsim
+            bool "OTA data over HTTP"
+
+        config ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT_ecc608a_plus_winsim
+            bool "OTA data over HTTP and MQTT"
+    endchoice
+    endif 
+
+    if !ENABLED_DATA_PROTOCOLS_SET_DEMO
+    choice ENABLED_DATA_PROTOCOLS_ecc608a_plus_winsim
+        bool "Enabled data protocols"
+
+        config ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_ecc608a_plus_winsim
+            bool "OTA data over HTTP and MQTT"
+            
+        config ENABLED_DATA_PROTOCOLS_MQTT_ecc608a_plus_winsim
+            bool "OTA data over MQTT"
+
+        config ENABLED_DATA_PROTOCOLS_HTTP_ecc608a_plus_winsim
+            bool "OTA data over HTTP"
+
+    endchoice
+    endif 
+
+    if !PRIMARY_DATA_PROTOCOL_SET_DEMO
+    choice PRIMARY_DATA_PROTOCOL_ecc608a_plus_winsim
+        bool "Select a primary data protocol"
+
+        config PRIMARY_DATA_PROTOCOLS_MQTT_ecc608a_plus_winsim
+            bool "MQTT as primary data protocol"
+            depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_ecc608a_plus_winsim || ENABLED_DATA_PROTOCOLS_MQTT_ecc608a_plus_winsim)
+
+        config PRIMARY_DATA_PROTOCOLS_HTTP_ecc608a_plus_winsim
+            bool "HTTP as primary data protocol"
+            depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_ecc608a_plus_winsim || ENABLED_DATA_PROTOCOLS_HTTP_ecc608a_plus_winsim)
+
+    endchoice
+    endif
+
+    config UPDATE_ALL_DEFAULT_DUMMY_VARIABLES
+        bool
+        default y
+        select STACK_SIZE_SET_BOARD
+        select LOG2_FILE_BLOCK_SIZE_SET_BOARD
+        select SELF_TEST_RESPONSE_WAIT_MS_SET_BOARD
+        select FILE_REQUEST_WAIT_MS_SET_BOARD
+        select OTA_AGENT_PRIORITY_SET_BOARD
+        select MAX_THINGNAME_LEN_SET_BOARD
+        select MAX_NUM_BLOCKS_REQUEST_SET_BOARD
+        select MAX_NUM_REQUEST_MOMENTUM_SET_BOARD
+        select MAX_NUM_OTA_DATA_BUFFERS_SET_BOARD
+        select ALLOW_DOWNGRADE_SET_BOARD
+        select ENABLED_CONTROL_PROTOCOLS_SET_BOARD
+        select ENABLED_DATA_PROTOCOLS_SET_BOARD
+        select PRIMARY_DATA_PROTOCOL_SET_BOARD
+endif

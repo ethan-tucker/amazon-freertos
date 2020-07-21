@@ -1,0 +1,2 @@
+config BOARD_mt7697hx-dev-kit
+        bool "mediatek mt7697hx-dev-kit"

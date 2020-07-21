@@ -1,0 +1,2 @@
+config BOARD_numaker_iot_m487_wifi
+        bool "nuvoton numaker_iot_m487_wifi"

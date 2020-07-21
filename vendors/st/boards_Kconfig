@@ -1,0 +1,2 @@
+config BOARD_stm32l475_discovery
+        bool "st stm32l475_discovery"

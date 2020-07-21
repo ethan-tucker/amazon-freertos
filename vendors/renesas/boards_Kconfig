@@ -1,0 +1,2 @@
+config BOARD_rx65n-rsk
+        bool "renesas rx65n-rsk"

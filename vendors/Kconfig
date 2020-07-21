@@ -1,0 +1,69 @@
+choice TARGET_VENDOR
+    bool "Select the target vendor"
+
+    config cypress
+        bool "cypress"
+    if cypress
+        source "vendors/cypress/Kconfig"
+    endif
+
+    config espressif
+        bool "espressif"
+    if espressif
+        source "vendors/espressif/Kconfig"
+    endif
+
+    config infineon
+        bool "infineon"
+    if infineon
+        source "vendors/infineon/Kconfig"
+    endif
+
+    config nuvoton
+        bool "nuvoton"
+    if nuvoton
+        source "vendors/nuvoton/Kconfig"
+    endif
+
+    config nxp
+        bool "nxp"
+    if nxp
+        source "vendors/nxp/Kconfig"
+    endif
+
+    config pc
+        bool "pc"
+    if pc
+        source "vendors/pc/Kconfig"
+    endif
+
+    config renesas
+        bool "renesas"
+    if renesas
+        source "vendors/renesas/Kconfig"
+    endif
+
+    config st
+        bool "st"
+    if st
+        source "vendors/st/Kconfig"
+    endif
+
+    config ti
+        bool "ti"
+    if ti
+        source "vendors/ti/Kconfig"
+    endif
+
+    config vendor
+        bool "vendor"
+    if vendor
+        source "vendors/vendor/Kconfig"
+    endif
+
+    config xilinx
+        bool "xilinx"
+    if xilinx
+        source "vendors/xilinx/Kconfig"
+    endif
+endchoice

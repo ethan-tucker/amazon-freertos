@@ -1,0 +1,5 @@
+config BOARD_curiosity_pic32mzef
+        bool "microchip curiosity_pic32mzef"
+
+config BOARD_ecc608a_plus_winsim
+        bool "microchip ecc608a_plus_winsim"

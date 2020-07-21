@@ -1,0 +1,5 @@
+config BOARD_linux
+        bool "pc linux"
+
+config BOARD_windows
+        bool "pc windows"

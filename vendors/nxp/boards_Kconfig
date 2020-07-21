@@ -1,0 +1,2 @@
+config BOARD_lpc54018iotmodule
+        bool "nxp lpc54018iotmodule"

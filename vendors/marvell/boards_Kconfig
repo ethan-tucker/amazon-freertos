@@ -1,0 +1,2 @@
+config BOARD_mw300_rd
+        bool "marvell mw300_rd"

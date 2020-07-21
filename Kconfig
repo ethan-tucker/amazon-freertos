@@ -1,20 +1,30 @@
 choice TARGET_BOARD
     bool "Select the target board"
-
-    config ESP32
-        bool "Espressif ESP32"
-
-    config pc
-        bool "Windows Device Simulator"
-    if pc
-        config NETWORK_INTERFACE
-        int "Network Interface to use"
-            default 0
-            help 
-                Only ethernet interfaces are supported by default.
-    endif
-
+    source "vendors/*/boards_Kconfig"
 endchoice
+
+#load the boards configurations
+source "vendors/*/Kconfig"
+
+menu "Library configurations"
+
+source "libraries/*/*/*/def_KConfig"
+
+source "libraries/*/*/*/KConfig"
+
+config TCP_ENABLED
+    bool "Enable TCP Library"
+    default n
+    help
+        Choose to enable the TCP library and its configurations.
+
+config TCP_ENABLED
+    bool
+    default y
+    help
+        Choose to enable the TCP library and its configurations.
+
+endmenu
 
 menu "WiFi configuration"
 
@@ -28,11 +38,22 @@ config WIFI_PASSWORD
     help
         The password of your wifi router.
 
-config WIFI_SECURITY
-    string "WiFi security"
-    help
-        The security type of your Wi-Fi network
+choice WIFI_SECURITY
+bool "Select your wifi security type"
 
+config WIFI_SECURITY_OPEN
+    bool "Wifi security type open"
+
+config WIFI_SECURITY_WEP
+    bool "Wifi security type wep"
+
+config WIFI_SECURITY_WPA
+    bool "Wifi security type wpa"
+
+config WIFI_SECURITY_WPA2
+    bool "Wifi security type wpa2"
+
+endchoice
 endmenu
 
 menu "AWS configuration"
@@ -43,9 +64,19 @@ config IOT_ENDPOINT
         The endpoint associated with your aws account.
 
 config THING_NAME
-    string "Thing name"
+    string "AWS Thing name"
     help
-        The thing name associated with your device.
+        The endpoint associated with your aws account.
+
+config THING_CERT
+    string "Thing certificate"
+    help
+        The certificate associated with your registered thing.
+
+config THING_PRIVATE_KEY
+    string "Thing private key"
+    help
+        The private key associated with your registered thing.
 
 endmenu
 
@@ -54,8 +85,13 @@ choice "Demo Selection"
     
     config MQTT_DEMO_ENABLED
         bool "MQTT demo"
+        depends on MQTT_ENABLED
 
     config SHADOW_DEMO_ENABLED
         bool "Shadow demo"
+        depends on MQTT_ENABLED
 
+    config OTA_DEMO_ENABLED
+        bool "OTA update demo"
+        depends on OTA_ENABLED
 endchoice

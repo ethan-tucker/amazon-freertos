@@ -1,0 +1,3 @@
+config OTA_SUPPORTED
+    bool
+    default n

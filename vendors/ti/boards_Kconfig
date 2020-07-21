@@ -1,0 +1,2 @@
+config BOARD_cc3220_launchpad
+        bool "ti cc3220_launchpad"

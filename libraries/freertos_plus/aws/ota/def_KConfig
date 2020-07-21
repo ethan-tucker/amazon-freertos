@@ -1,0 +1,103 @@
+config STACK_SIZE_SET_DEMO
+    bool
+    default n
+
+config LOG2_FILE_BLOCK_SIZE_SET_DEMO
+    bool
+    default n
+
+config SELF_TEST_RESPONSE_WAIT_MS_SET_DEMO
+    bool
+    default n
+
+config FILE_REQUEST_WAIT_MS_SET_DEMO
+    bool
+    default n
+
+config OTA_AGENT_PRIORITY_SET_DEMO
+    bool
+    default n
+
+config MAX_THINGNAME_LEN_SET_DEMO
+    bool
+    default n
+
+config MAX_NUM_BLOCKS_REQUEST_SET_DEMO
+    bool
+    default n
+
+config MAX_NUM_REQUEST_MOMENTUM_SET_DEMO
+    bool
+    default n
+
+config MAX_NUM_OTA_DATA_BUFFERS_SET_DEMO
+    bool
+    default n
+
+config ALLOW_DOWNGRADE_SET_DEMO_DEMO
+    bool
+    default n
+
+config ENABLED_CONTROL_PROTOCOLS_SET_DEMO
+    bool
+    default n
+
+config ENABLED_DATA_PROTOCOLS_SET_DEMO
+    bool
+    default n
+
+config PRIMARY_DATA_PROTOCOL_SET_DEMO
+    bool
+    default n
+
+config STACK_SIZE_SET_BOARD
+    bool
+    default n
+
+config LOG2_FILE_BLOCK_SIZE_SET_BOARD
+    bool
+    default n
+
+config SELF_TEST_RESPONSE_WAIT_MS_SET_BOARD
+    bool
+    default n
+
+config FILE_REQUEST_WAIT_MS_SET_BOARD
+    bool
+    default n
+
+config OTA_AGENT_PRIORITY_SET_BOARD
+    bool
+    default n
+
+config MAX_THINGNAME_LEN_SET_BOARD
+    bool
+    default n
+
+config MAX_NUM_BLOCKS_REQUEST_SET_BOARD
+    bool
+    default n
+
+config MAX_NUM_REQUEST_MOMENTUM_SET_BOARD
+    bool
+    default n
+
+config MAX_NUM_OTA_DATA_BUFFERS_SET_BOARD
+    bool
+    default n
+
+config ALLOW_DOWNGRADE_SET_BOARD
+    bool
+    default n
+
+config ENABLED_CONTROL_PROTOCOLS_SET_BOARD
+    bool
+    default n
+
+config ENABLED_DATA_PROTOCOLS_SET_BOARD
+    bool
+    default n
+
+config PRIMARY_DATA_PROTOCOL_SET_BOARD
+    bool
+    default n

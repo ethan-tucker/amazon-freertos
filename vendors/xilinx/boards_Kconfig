@@ -1,0 +1,2 @@
+config BOARD_microzed
+        bool "xilinx microzed"
