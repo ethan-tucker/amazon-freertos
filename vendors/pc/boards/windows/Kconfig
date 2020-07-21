@@ -4,4 +4,4 @@ config OTA_SUPPORTED
 
 config WIFI_ENABLED
     bool
-    default y
+    default n

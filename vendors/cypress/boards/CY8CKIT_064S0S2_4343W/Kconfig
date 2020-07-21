@@ -1,3 +1,7 @@
 config OTA_SUPPORTED   
     bool
     default y
+
+config WIFI_ENABLED
+    bool
+    default y
