@@ -72,6 +72,16 @@
  * @note Possible values are eWiFiSecurityOpen, eWiFiSecurityWEP, eWiFiSecurityWPA,
  * eWiFiSecurityWPA2 (depending on the support of your device Wi-Fi radio).
  */
-#define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA2
+#if defined(CONFIG_WIFI_SECURITY_OPEN)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityOpen
+#elif defined(CONFIG_WIFI_SECURITY_WEP)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWEP
+#elif defined(CONFIG_WIFI_SECURITY_WPA)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA
+#elif defined(CONFIG_WIFI_SECURITY_WPA2)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA2
+#else
+    #error "No wifi security type selected"
+#endif
 
 #endif /* ifndef __AWS_CLIENTCREDENTIAL__H__ */

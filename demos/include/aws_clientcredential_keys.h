@@ -26,51 +26,43 @@
 #ifndef AWS_CLIENT_CREDENTIAL_KEYS_H
 #define AWS_CLIENT_CREDENTIAL_KEYS_H
 
+#include <stdint.h>
+#include "kconfig.h"
 /*
- * @brief PEM-encoded client certificate.
- *
- * @todo If you are running one of the FreeRTOS demo projects, set this
- * to the certificate that will be used for TLS client authentication.
- *
- * @note Must include the PEM header and footer:
- * "-----BEGIN CERTIFICATE-----\n"\
- * "...base64 data...\n"\
- * "-----END CERTIFICATE-----\n"
- */
-#define keyCLIENT_CERTIFICATE_PEM                   NULL
-
-/*
- * @brief PEM-encoded issuer certificate for AWS IoT Just In Time Registration (JITR).
- *
- * @todo If you are using AWS IoT Just in Time Registration (JITR), set this to
- * the issuer (Certificate Authority) certificate of the client certificate above.
- *
- * @note This setting is required by JITR because the issuer is used by the AWS
- * IoT gateway for routing the device's initial request. (The device client
- * certificate must always be sent as well.) For more information about JITR, see:
- *  https://docs.aws.amazon.com/iot/latest/developerguide/jit-provisioning.html,
- *  https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/.
- *
- * If you're not using JITR, set below to NULL.
+ * PEM-encoded client certificate.
  *
  * Must include the PEM header and footer:
  * "-----BEGIN CERTIFICATE-----\n"\
  * "...base64 data...\n"\
- * "-----END CERTIFICATE-----\n"
+ * "-----END CERTIFICATE-----"
  */
-#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM    NULL
+#define keyCLIENT_CERTIFICATE_PEM \
+"-----BEGIN CERTIFICATE-----\n"\
+CONFIG_THING_CERT\
+"\n-----END CERTIFICATE-----"
 
 /*
- * @brief PEM-encoded client private key.
+ * PEM-encoded client private key.
  *
- * @todo If you are running one of the FreeRTOS demo projects, set this
- * to the private key that will be used for TLS client authentication.
- *
- * @note Must include the PEM header and footer:
+ * Must include the PEM header and footer:
  * "-----BEGIN RSA PRIVATE KEY-----\n"\
  * "...base64 data...\n"\
- * "-----END RSA PRIVATE KEY-----\n"
+ * "-----END RSA PRIVATE KEY-----"
  */
-#define keyCLIENT_PRIVATE_KEY_PEM                   NULL
+#define keyCLIENT_PRIVATE_KEY_PEM \
+"-----BEGIN RSA PRIVATE KEY-----\n"\
+CONFIG_THING_PRIVATE_KEY\
+"\n-----END RSA PRIVATE KEY-----"
+
+/*
+ * PEM-encoded Just-in-Time Registration (JITR) certificate (optional).
+ *
+ * If used, must include the PEM header and footer:
+ * "-----BEGIN CERTIFICATE-----\n"\
+ * "...base64 data...\n"\
+ * "-----END CERTIFICATE-----"
+ */
+#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM  ""
+
 
 #endif /* AWS_CLIENT_CREDENTIAL_KEYS_H */
