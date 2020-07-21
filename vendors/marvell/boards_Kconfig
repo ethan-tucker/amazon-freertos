@@ -1,2 +1,6 @@
 config BOARD_mw300_rd
-        bool "marvell mw300_rd"
+    bool "marvell mw300_rd"
+
+if BOARD_mw300_rd
+    rsource "boards/mw300_rd/Kconfig"
+endif

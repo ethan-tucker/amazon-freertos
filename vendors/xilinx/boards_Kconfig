@@ -1,2 +1,6 @@
 config BOARD_microzed
         bool "xilinx microzed"
+
+if BOARD_microzed
+        rsource "boards/microzed/Kconfig"
+endif

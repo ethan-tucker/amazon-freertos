@@ -1,2 +1,6 @@
 config BOARD_cc3220_launchpad
         bool "ti cc3220_launchpad"
+
+if BOARD_cc3220_launchpad
+        rsource "boards/cc3220_launchpad/Kconfig"
+endif

@@ -1,5 +1,13 @@
 config BOARD_xmc4800_iotkit
         bool "infineon xmc4800_iotkit"
 
+if BOARD_xmc4800_iotkit
+    rsource "boards/xmc4800_iotkit/Kconfig"
+endif
+
 config BOARD_xmc4800_plus_optiga_trust_x
         bool "infineon xmc4800_plus_optiga_trust_x"
+
+if BOARD_xmc4800_plus_optiga_trust_x
+    rsource "boards/xmc4800_plus_optiga_trust_x/Kconfig"
+endif

@@ -1,2 +1,6 @@
 config BOARD_lpc54018iotmodule
         bool "nxp lpc54018iotmodule"
+
+if BOARD_lpc54018iotmodule
+        rsource "boards/lpc54018iotmodule/Kconfig"
+endif

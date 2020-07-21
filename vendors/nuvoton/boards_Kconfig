@@ -1,2 +1,6 @@
 config BOARD_numaker_iot_m487_wifi
         bool "nuvoton numaker_iot_m487_wifi"
+
+if BOARD_numaker_iot_m487_wifi
+        rsource "boards/numaker_iot_m487_wifi/Kconfig"
+endif

@@ -1,15 +1,17 @@
+#Displays the board options and loads the board configurations for the chosen board
 choice TARGET_BOARD
     bool "Select the target board"
     source "vendors/*/boards_Kconfig"
 endchoice
 
-#load the boards configurations
-source "vendors/*/Kconfig"
 
 menu "Library configurations"
 
+#Sources the boolean variables to keep track of what library variables have been defined
+#at the demo, board, and libary level
 source "libraries/*/*/*/def_KConfig"
 
+#Sources the library configuration file, which first sources configurations for the library for the selected board
 source "libraries/*/*/*/KConfig"
 
 config TCP_ENABLED
@@ -27,6 +29,7 @@ config TCP_ENABLED
 endmenu
 
 menu "WiFi configuration"
+depends on WIFI_ENABLED
 
 config WIFI_SSID
     string "WiFi SSID"
@@ -54,6 +57,13 @@ config WIFI_SECURITY_WPA2
     bool "Wifi security type wpa2"
 
 endchoice
+endmenu
+
+menu "Ethernet configuration"
+depends on !WIFI_ENABLED
+    config NETWORK_INTERFACE
+        int "Network interface to use for ethernet"
+        default 1
 endmenu
 
 menu "AWS configuration"

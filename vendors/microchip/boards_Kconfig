@@ -1,5 +1,13 @@
 config BOARD_curiosity_pic32mzef
         bool "microchip curiosity_pic32mzef"
 
+if BOARD_curiosity_pic32mzef
+        rsource "boards/curiosity_pic32mzef/Kconfig"
+endif
+
 config BOARD_ecc608a_plus_winsim
         bool "microchip ecc608a_plus_winsim"
+
+if BOARD_ecc608a_plus_winsim
+        rsource "boards/ecc608a_plus_winsim/Kconfig"
+endif
