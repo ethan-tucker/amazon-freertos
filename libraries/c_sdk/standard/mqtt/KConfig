@@ -1,36 +1,38 @@
-config MQTT_ENABLED
-    bool "Enable MQTT library"
-    default y
-    help
-        Choose to enable the MQTT library and its configurations.
+if MQTT_SUPPORTED
+    config MQTT_ENABLED
+        bool "Enable MQTT library"
+        default y
+        help
+            Choose to enable the MQTT library and its configurations.
+            
+    if MQTT_ENABLED
 
-if MQTT_ENABLED
+        config LIBRARY_LOG_NAME
+            string "Library log name"
 
-    config LIBRARY_LOG_NAME
-        string "Library log name"
+        choice LIBRARY_LOG_LEVEL
+            bool "Library log level"
 
-    choice LIBRARY_LOG_LEVEL
-        bool "Library log level"
+            config LOG_NONE
+                bool "LOG_NONE"
 
-        config LOG_NONE
-            bool "LOG_NONE"
+            config LOG_ERROR
+                bool "LOG_ERROR"
 
-        config LOG_ERROR
-            bool "LOG_ERROR"
+            config LOG_WARN
+                bool "LOG_WARN"
 
-        config LOG_WARN
-            bool "LOG_WARN"
+            config LOG_INFO
+                bool "LOG_INFO"
 
-        config LOG_INFO
-            bool "LOG_INFO"
+            config LOG_DEBUG
+                bool "LOG_DEBUG"
+        endchoice
 
-        config LOG_DEBUG
-            bool "LOG_DEBUG"
-    endchoice
+        config MQTT_STATE_ARRAY_MAX_COUNT
+            int "MQTT state array max count"
 
-    config MQTT_STATE_ARRAY_MAX_COUNT
-        int "MQTT state array max count"
-
-    config MQTT_MAX_QUEUED_PUBLISH_MESSAGES
-        int "MQTT max queued publish messages"
+        config MQTT_MAX_QUEUED_PUBLISH_MESSAGES
+            int "MQTT max queued publish messages"
+    endif
 endif

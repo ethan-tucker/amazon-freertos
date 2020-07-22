@@ -16,13 +16,8 @@ source "libraries/*/*/*/KConfig"
 
 config TCP_ENABLED
     bool "Enable TCP Library"
-    default n
-    help
-        Choose to enable the TCP library and its configurations.
-
-config TCP_ENABLED
-    bool
     default y
+    depends on TCP_SUPPORTED
     help
         Choose to enable the TCP library and its configurations.
 
