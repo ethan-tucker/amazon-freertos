@@ -80,8 +80,6 @@
     #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA
 #elif defined(CONFIG_WIFI_SECURITY_WPA2)
     #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA2
-#else
-    #error "No wifi security type selected"
 #endif
 
 #endif /* ifndef __AWS_CLIENTCREDENTIAL__H__ */
