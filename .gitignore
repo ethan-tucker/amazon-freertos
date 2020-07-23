@@ -13,6 +13,9 @@ doxygen_warnings.txt
 !/vendors/cypress/MTB/psoc6/psoc64tfm/COMPONENT_TFM_S_FW/tfm_s_unsigned.hex
 *.bin
 *.pyc
+*.config
+*.old
+*.vcxproj
 
 RemoteSystemsTempFiles/*
 

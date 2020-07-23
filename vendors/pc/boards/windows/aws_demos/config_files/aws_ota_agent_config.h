@@ -31,22 +31,23 @@
 #ifndef _AWS_OTA_AGENT_CONFIG_H_
 #define _AWS_OTA_AGENT_CONFIG_H_
 
+#include "kconfig.h"
 /**
  * @brief The number of words allocated to the stack for the OTA agent.
  */
-#define otaconfigSTACK_SIZE                    630U
+#define otaconfigSTACK_SIZE                    CONFIG_STACK_SIZE_windows
 
 /**
  * @brief Log base 2 of the size of the file data block message (excluding the header).
  *
  * 10 bits yields a data block size of 1KB.
  */
-#define otaconfigLOG2_FILE_BLOCK_SIZE          12UL
+#define otaconfigLOG2_FILE_BLOCK_SIZE          CONFIG_LOG2_FILE_BLOCK_SIZE_windows
 
 /**
  * @brief Milliseconds to wait for the self test phase to succeed before we force reset.
  */
-#define otaconfigSELF_TEST_RESPONSE_WAIT_MS    16000U
+#define otaconfigSELF_TEST_RESPONSE_WAIT_MS    CONFIG_SELF_TEST_RESPONSE_WAIT_MS_windows
 
 /**
  * @brief Milliseconds to wait before requesting data blocks from the OTA service if nothing is happening.
@@ -54,12 +55,12 @@
  * The wait timer is reset whenever a data block is received from the OTA service so we will only send
  * the request message after being idle for this amount of time.
  */
-#define otaconfigFILE_REQUEST_WAIT_MS          10000U
+#define otaconfigFILE_REQUEST_WAIT_MS          CONFIG_FILE_REQUEST_WAIT_MS_windows
 
 /**
  * @brief The OTA agents task priority. Normally it runs at a low priority.
  */
-#define otaconfigAGENT_PRIORITY                tskIDLE_PRIORITY
+#define otaconfigAGENT_PRIORITY                tskIDLE_PRIORITY + CONFIG_OTA_AGENT_PRIORITY_windows
 
 /**
  * @brief The maximum allowed length of the thing name used by the OTA agent.
@@ -69,7 +70,7 @@
  * initializing the OTA agent. The agent uses this size to allocate static storage for the
  * Thing name used in all OTA base topics. Namely $aws/things/<thingName>
  */
-#define otaconfigMAX_THINGNAME_LEN             64U
+#define otaconfigMAX_THINGNAME_LEN             CONFIG_MAX_THINGNAME_LEN_windows
 
 
 /**
@@ -84,7 +85,7 @@
  *  Please note that this must be set larger than zero.
  *
  */
-#define otaconfigMAX_NUM_BLOCKS_REQUEST      1U
+#define otaconfigMAX_NUM_BLOCKS_REQUEST      CONFIG_MAX_NUM_BLOCKS_REQUEST_windows
 
 /**
  * @brief The maximum number of requests allowed to send without a response before we abort.
@@ -93,7 +94,7 @@
  * the selected communication channel before aborting and returning error.
  *
  */
-#define otaconfigMAX_NUM_REQUEST_MOMENTUM    32U
+#define otaconfigMAX_NUM_REQUEST_MOMENTUM    CONFIG_MAX_NUM_REQUEST_MOMENTUM_windows
 
 /**
  * @brief The number of data buffers reserved by the OTA agent.
@@ -101,7 +102,7 @@
  * This configurations parameter sets the maximum number of static data buffers used by
  * the OTA agent for job and file data blocks received.
  */
-#define otaconfigMAX_NUM_OTA_DATA_BUFFERS    4U
+#define otaconfigMAX_NUM_OTA_DATA_BUFFERS    CONFIG_MAX_NUM_OTA_DATA_BUFFERS_windows
 
 /**
  * @brief Allow update to same or lower version.
@@ -111,7 +112,11 @@
  * testing purpose and it is recommended to always update to higher version and keep this
  * configuration disabled.
  */
-#define otaconfigAllowDowngrade              0U
+#if defined( CONFIG_ALLOW_DOWNGRADE_windows )
+    #define otaconfigAllowDowngrade              CONFIG_ALLOW_DOWNGRADE_windows
+#else
+    #define otaconfigAllowDowngrade              0
+#endif
 
 /**
  * @brief The protocol selected for OTA control operations.
@@ -121,8 +126,14 @@
  *
  * Note - Only MQTT is supported at this time for control operations.
  */
-#define configENABLED_CONTROL_PROTOCOL       ( OTA_CONTROL_OVER_MQTT )
 
+#if defined( CONFIG_ENABLED_CONTROL_PROTOCOLS_MQTT_windows )
+    #define configENABLED_CONTROL_PROTOCOL       ( OTA_CONTROL_OVER_MQTT )
+#elif defined( CONFIG_ENABLED_CONTROL_PROTOCOLS_HTTP_windows)
+    #define configENABLED_CONTROL_PROTOCOL       ( OTA_CONTROL_OVER_HTTP )
+#elif defined( CONFIG_ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT_windows )
+    #define configENABLED_CONTROL_PROTOCOL       ( OTA_DATA_OVER_MQTT | OTA_DATA_OVER_HTTP )
+#endif
 /**
  * @brief The protocol selected for OTA data operations.
  *
@@ -135,8 +146,14 @@
  * Enable data over HTTP - ( OTA_DATA_OVER_HTTP)
  * Enable data over both MQTT & HTTP ( OTA_DATA_OVER_MQTT | OTA_DATA_OVER_HTTP )
  */
-#define configENABLED_DATA_PROTOCOLS         ( OTA_DATA_OVER_MQTT | OTA_DATA_OVER_HTTP )
 
+#if defined( CONFIG_ENABLED_DATA_PROTOCOLS_MQTT_windows )
+    #define configENABLED_DATA_PROTOCOLS         ( OTA_DATA_OVER_MQTT )
+#elif defined( CONFIG_ENABLED_DATA_PROTOCOLS_HTTP_windows)
+    #define configENABLED_DATA_PROTOCOLS         ( OTA_DATA_OVER_HTTP )
+#elif defined( CONFIG_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_windows)
+    #define configENABLED_DATA_PROTOCOLS         ( OTA_DATA_OVER_MQTT | OTA_DATA_OVER_HTTP )
+#endif
 /**
  * @brief The preferred protocol selected for OTA data operations.
  *
@@ -147,7 +164,9 @@
  * Note - use OTA_DATA_OVER_HTTP for HTTP as primary data protocol.
  */
 
-#define configOTA_PRIMARY_DATA_PROTOCOL    ( OTA_DATA_OVER_MQTT )
-
-
+#if defined( CONFIG_PRIMARY_DATA_PROTOCOLS_MQTT_windows )
+    #define configOTA_PRIMARY_DATA_PROTOCOL         ( OTA_DATA_OVER_MQTT )
+#elif defined( CONFIG_PRIMARY_DATA_PROTOCOLS_HTTP_windows)
+    #define configOTA_PRIMARY_DATA_PROTOCOL         ( OTA_DATA_OVER_HTTP )
+#endif
 #endif /* _AWS_OTA_AGENT_CONFIG_H_ */

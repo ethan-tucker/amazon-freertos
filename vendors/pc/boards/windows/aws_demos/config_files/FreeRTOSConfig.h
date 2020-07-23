@@ -25,7 +25,7 @@
 
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
-import "kconfig.h"
+#include "kconfig.h"
 
 /*-----------------------------------------------------------
 * Application specific definitions.
