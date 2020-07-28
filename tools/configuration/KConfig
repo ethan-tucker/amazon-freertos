@@ -1,85 +1,29 @@
-menu "Ota library configuration"
+# Variable defaults that determine whether or not a board has certain capabilities. These values are overwritten
+config ALWAYS_FALSE
+    bool 
+    default n
 
-config STACK_SIZE
-    int "Stack size"
+menu "Board Properties"
+    config OTA_ENABLED
+        bool "Ota enabled"
 
-config LOG2_FILE_BLOCK_SIZE
-    int "Log 2 file block size"
-    default 10
+    config MQTT_ENABLED
+        bool "Mqtt enabled"
 
-config SELF_TEST_RESPONSE_WAIT_MS
-    int "Self test response wait (milliseconds)"
-    default 16000
-
-
-config FILE_REQUEST_WAIT_MS
-    int "File request wait (milliseconds)"
-    default 10000
-
-config OTA_AGENT_PRIORITY
-    int "OTA agent priority"
-    default 0
-    help
-        0 is the lowest priority.
-
-config MAX_THINGNAME_LEN
-    int "Max thingname length"
-    default 64
-
-config MAX_NUM_BLOCKS_REQUEST
-    int "Max num of blocks requested"
-    default 1
-
-config MAX_NUM_REQUEST_MOMENTUM
-    int "Max num request momentum"
-    default 32
-
-config MAX_NUM_OTA_DATA_BUFFERS
-    int "Max num OTA data buffers"
-    default 4
-
-config ALLOW_DOWNGRADE
-    bool "Allow downgrades"
-
-choice ENABLED_CONTROL_PROTOCOLS
-    bool "Enabled control protocols" 
-
-    config ENABLED_CONTROL_PROTOCOLS_MQTT
-        bool "OTA data over MQTT"
+    config TCP_ENABLED
+        bool "Tcp enabled"
         
+    config WIFI_ENABLED
+        bool "Wifi enabled"
+endmenu
 
-    config ENABLED_CONTROL_PROTOCOLS_HTTP
-        bool "OTA data over HTTP"
 
-    config ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT
-        bool "OTA data over HTTP and MQTT"
-endchoice
+source "../../libraries/freertos_plus/aws/ota/KConfig"
 
-choice ENABLED_DATA_PROTOCOLS
-    bool "Enabled data protocols"
 
-    config ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT
-        bool "OTA data over HTTP and MQTT"
-
-    config ENABLED_DATA_PROTOCOLS_HTTP
-        bool "OTA data over HTTP"
-
-    config ENABLED_DATA_PROTOCOLS_MQTT
-        bool "OTA data over MQTT"
-
-endchoice
-
-choice PRIMARY_DATA_PROTOCOL
-    bool "Select a primary data protocol"
-
-    config PRIMARY_DATA_PROTOCOLS_MQTT
-        bool "MQTT as primary data protocol"
-        depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || ENABLED_DATA_PROTOCOLS_MQTT)
-
-    config PRIMARY_DATA_PROTOCOLS_HTTP
-        bool "HTTP as primary data protocol"
-        depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || ENABLED_DATA_PROTOCOLS_HTTP)
-endchoice
+menu "Mqtt library configuration"
+    config JUST_FOR_SHOW
+        bool "placeholder"
 endmenu
 
 

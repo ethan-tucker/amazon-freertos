@@ -1,3 +1,7 @@
+if OTA_ENABLED
+
+menu "Ota library configuration"
+
 config STACK_SIZE
     int "Stack size"
 
@@ -77,3 +81,5 @@ choice PRIMARY_DATA_PROTOCOL
         bool "HTTP as primary data protocol"
         depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || ENABLED_DATA_PROTOCOLS_HTTP)
 endchoice
+endmenu
+endif

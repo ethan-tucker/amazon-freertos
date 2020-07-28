@@ -1,15 +1,4 @@
-config OTA_SUPPORTED
-    bool
-    default y
-
-config MQTT_SUPPORTED   
-    bool
-    default y
-
-config TCP_SUPPORTED   
-    bool
-    default y
-    
-config WIFI_ENABLED
-    bool
-    default n
+CONFIG_OTA_ENABLED=y
+CONFIG_MQTT_ENABLED=y
+CONFIG_TCP_ENABLED=y
+CONFIG_WIFI_ENABLED=y

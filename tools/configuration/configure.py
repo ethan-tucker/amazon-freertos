@@ -1,43 +1,43 @@
 import subprocess
 import os.path
-
+import kconfiglib
 
 def getBoardChoice(boards, vendor_idx):
-    print("-----BOARDS-----")
+    print("\n-----BOARDS-----")
     
     for board_idx in range(len(boards[vendor_idx])):
         print("%s) %s" %(board_idx+1, boards[vendor_idx][board_idx]))
     
-    board = input("Select your board (by number): ")
+    board = input("\nSelect your board (by number): ")
     valid = False
     while not valid:
         if(board.isdigit()):
             board_int = int(board)
             if(board_int < 1 or board_int > len(boards[vendor_idx])):
-                board = input("Select your vendor (please enter a valid number): ")
+                board = input("\nSelect your vendor (please enter a valid number): ")
             else:
                 valid = True
         else:
-            board = input("Select your vendor (please enter a number): ")
+            board = input("\nSelect your vendor (please enter a number): ")
     return boards[vendor_idx][board_int-1]
 
 
 def getVendorChoice(vendors):
-    print("-----VENDORS-----")
+    print("\n-----VENDORS-----")
     for vendor_idx in range(len(vendors)):
         print("%s) %s" %(vendor_idx+1, vendors[vendor_idx]))
     
-    vendor = input("Select your vendor (by number): ")
+    vendor = input("\nSelect your vendor (by number): ")
     valid = False
     while not valid:
         if(vendor.isdigit()):
             vendor_int = int(vendor)
             if(vendor_int < 1 or vendor_int > len(vendors)):
-                vendor = input("Select your vendor (please enter a valid number): ")
+                vendor = input("\nSelect your vendor (please enter a valid number): ")
             else:
                 valid = True
         else:
-            vendor = input("Select your vendor (please enter a number): ")
+            vendor = input("\nSelect your vendor (please enter a number): ")
 
     return (vendor_int-1, vendors[vendor_int-1])
 
@@ -51,14 +51,16 @@ def boardChoiceMenu(vendors, boards):
     board = getBoardChoice(boards, vendorIdx)
 
     ota_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/ota_Kconfig"
-    print(ota_board_config)
-    subprocess.run(["py","merge_config.py", "Kconfig", ".config", ota_library_config, ota_board_config])
+    board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
+
+    subprocess.run(["py","merge_config.py", "KConfig", ".config", ota_board_config, board_properties])
     f = open("boardChoice.csv", "w")
     f.write(vendor_name + "," + board)
 
 
 def boardConfiguration():
     subprocess.run(["guiconfig"])
+    print("-----Finished configuring-----")
 
 
 def loadCurrentBoardChoice():
@@ -70,25 +72,33 @@ def loadCurrentBoardChoice():
         return (vendor, board)
     return None
 
+
 def main():
-    vendors = ["espressif", "pc"]
-    boards = [["esp32"], ["linux", "windows"]]
-
+    vendors = ["cypress", "espressif", "infineon", "marvell", "mediatek", "microchip", "nordic", "nuvoton", "nxp", "pc", "renesas", "st", "ti", "xilinx"]
+    boards = [["CY8CKIT_064S0S2_4343W","CYW943907AEVAL1F","CYW954907AEVAL1F"], ["esp32"], ["xmc4800_iotkit","xmc4800_plus_optiga_trust_x"], ["mw300_rd"], ["mt7697hx-dev-kit"], \
+             ["curiosity_pic32mzef","ecc608a_plus_winsim"], ["nrf52840-dk"], ["numaker_iot_m487_wifi"], ["lpc54018iotmodule"], ["linux","windows"], ["rx65n-rsk"], ["stm32l475_discovery"], \
+             ["cc3220_launchpad"], ["microzed"]]
+    # sets the prefix to the generated config variables, this defualts to 'CONFIG_' which is unecesary
+    board_chosen = False
     currentBoardChoice = loadCurrentBoardChoice()
-
+    if(currentBoardChoice):
+        board_chosen = True
     choice = ""
+
     while choice != "3":
-        print("-----FREERTOS Configuration-----")
+        print("\n-----FREERTOS Configuration-----")
         print("Options:")
-        print("1) Choose a board and a demo")
-        if(currentBoardChoice != None):
-            print("2) Configure your demo for the %s:%s board"% (currentBoardChoice[0],currentBoardChoice[1]))
+        print("1) Choose a board")
+        if(board_chosen):
+            print("2) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
         print("3) Exit")
         choice = input("What do you want to do?: ")
         
         if(choice == "1"):
             boardChoiceMenu(vendors, boards)
-        elif(choice == "2" and currentBoardChoice != None):
+            currentBoardChoice = loadCurrentBoardChoice()
+            board_chosen = True
+        elif(choice == "2" and board_chosen):
             boardConfiguration()
         elif(choice == "3"):
             pass

@@ -1,49 +1,7 @@
-if BOARD_mw300_rd
-    config STACK_SIZE_mw300_rd
-        int "Stack size"
-        default 630
-        depends on !STACK_SIZE_SET_DEMO
-    
-    config LOG2_FILE_BLOCK_SIZE_mw300_rd
-        int "Log 2 file block size"
-        default 10
-        depends on !LOG2_FILE_BLOCK_SIZE_SET_DEMO
-
-    config SELF_TEST_RESPONSE_WAIT_MS_mw300_rd
-        int "Self test response wait (milliseconds)"
-        default 16000
-        depends on !SELF_TEST_RESPONSE_WAIT_MS_SET_DEMO
-
-    config FILE_REQUEST_WAIT_MS_mw300_rd
-        int "File request wait (milliseconds)"
-        default 2500
-        depends on !FILE_REQUEST_WAIT_MS_SET_DEMO
-
-    config OTA_AGENT_PRIORITY_mw300_rd
-        int "OTA agent priority"
-        default 0
-        help
-            0 is the lowest priority.
-        depends on !OTA_AGENT_PRIORITY_SET_DEMO
-
-    config MAX_THINGNAME_LEN_mw300_rd
-        int "Max thingname length"
-        default 64
-        depends on !MAX_THINGNAME_LEN_SET_DEMO
-
-    config MAX_NUM_BLOCKS_REQUEST_mw300_rd
-        int "Max num of blocks requested"
-        default 128
-        depends on !MAX_NUM_BLOCKS_REQUEST_SET_DEMO
-
-    config UPDATE_ALL_DEFAULT_DUMMY_VARIABLES
-        bool
-        default y
-        select STACK_SIZE_SET_BOARD
-        select LOG2_FILE_BLOCK_SIZE_SET_BOARD
-        select SELF_TEST_RESPONSE_WAIT_MS_SET_BOARD
-        select FILE_REQUEST_WAIT_MS_SET_BOARD
-        select OTA_AGENT_PRIORITY_SET_BOARD
-        select MAX_THINGNAME_LEN_SET_BOARD
-        select MAX_NUM_BLOCKS_REQUEST_SET_BOARD
-endif
+CONFIG_STACK_SIZE=630
+CONFIG_LOG2_FILE_BLOCK_SIZE=10
+CONFIG_SELF_TEST_RESPONSE_WAIT_MS=16000
+CONFIG_FILE_REQUEST_WAIT_MS=2500
+CONFIG_OTA_AGENT_PRIORITY=0
+CONFIG_MAX_THINGNAME_LEN=64
+CONFIG_MAX_NUM_BLOCKS_REQUEST=128

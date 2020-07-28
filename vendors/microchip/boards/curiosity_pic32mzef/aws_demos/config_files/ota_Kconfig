@@ -1,116 +1,18 @@
-if BOARD_curiosity_pic32mzef
-    config STACK_SIZE_curiosity_pic32mzef
-        int "Stack size"
-        default 3584
-        depends on !STACK_SIZE_SET_DEMO
-
-    config LOG2_FILE_BLOCK_SIZE_curiosity_pic32mzef
-        int "Log 2 file block size"
-        default 10
-        depends on !LOG2_FILE_BLOCK_SIZE_SET_DEMO
-
-    config SELF_TEST_RESPONSE_WAIT_MS_curiosity_pic32mzef
-        int "Self test response wait (milliseconds)"
-        default 16000
-        depends on !SELF_TEST_RESPONSE_WAIT_MS_SET_DEMO
-
-    config FILE_REQUEST_WAIT_MS_curiosity_pic32mzef
-        int "File request wait (milliseconds)"
-        default 10000
-        depends on !FILE_REQUEST_WAIT_MS_SET_DEMO
-
-    config OTA_AGENT_PRIORITY_curiosity_pic32mzef
-        int "OTA agent priority"
-        default 0
-        help
-            0 is the lowest priority.
-        depends on !OTA_AGENT_PRIORITY_SET_DEMO
-
-    config MAX_THINGNAME_LEN_curiosity_pic32mzef
-        int "Max thingname length"
-        default 64
-        depends on !MAX_THINGNAME_LEN_SET_DEMO
-
-    config MAX_NUM_BLOCKS_REQUEST_curiosity_pic32mzef
-        int "Max num of blocks requested"
-        default 8
-        depends on !MAX_NUM_BLOCKS_REQUEST_SET_DEMO
-
-    config MAX_NUM_REQUEST_MOMENTUM_curiosity_pic32mzef
-        int "Max num request momentum"
-        default 32
-        depends on !MAX_NUM_REQUEST_MOMENTUM_SET_DEMO
-
-    config MAX_NUM_OTA_DATA_BUFFERS_curiosity_pic32mzef
-        int "Max num OTA data buffers"
-        default 2
-        depends on !MAX_NUM_OTA_DATA_BUFFERS_SET_DEMO
-
-    config ALLOW_DOWNGRADE_curiosity_pic32mzef
-        bool "Allow downgrades"
-        default 0
-        depends on !ALLOW_DOWNGRADE_SET_DEMO
-
-    if !ENABLED_CONTROL_PROTOCOLS_SET_DEMO
-    choice ENABLED_CONTROL_PROTOCOLS_curiosity_pic32mzef
-        bool "Enabled control protocols"
-
-        config ENABLED_CONTROL_PROTOCOLS_MQTT_curiosity_pic32mzef
-            bool "OTA data over MQTT"
-
-        config ENABLED_CONTROL_PROTOCOLS_HTTP_curiosity_pic32mzef
-            bool "OTA data over HTTP"
-
-        config ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT_curiosity_pic32mzef
-            bool "OTA data over HTTP and MQTT"
-    endchoice
-    endif 
-
-    if !ENABLED_DATA_PROTOCOLS_SET_DEMO
-    choice ENABLED_DATA_PROTOCOLS_curiosity_pic32mzef
-        bool "Enabled data protocols"
-
-        config ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_curiosity_pic32mzef
-            bool "OTA data over HTTP and MQTT"
-            
-        config ENABLED_DATA_PROTOCOLS_MQTT_curiosity_pic32mzef
-            bool "OTA data over MQTT"
-
-        config ENABLED_DATA_PROTOCOLS_HTTP_curiosity_pic32mzef
-            bool "OTA data over HTTP"
-
-    endchoice
-    endif 
-
-    if !PRIMARY_DATA_PROTOCOL_SET_DEMO
-    choice PRIMARY_DATA_PROTOCOL_curiosity_pic32mzef
-        bool "Select a primary data protocol"
-
-        config PRIMARY_DATA_PROTOCOLS_MQTT_curiosity_pic32mzef
-            bool "MQTT as primary data protocol"
-            depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_curiosity_pic32mzef || ENABLED_DATA_PROTOCOLS_MQTT_curiosity_pic32mzef)
-
-        config PRIMARY_DATA_PROTOCOLS_HTTP_curiosity_pic32mzef
-            bool "HTTP as primary data protocol"
-            depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT_curiosity_pic32mzef || ENABLED_DATA_PROTOCOLS_HTTP_curiosity_pic32mzef)
-
-    endchoice
-    endif
-
-    config UPDATE_ALL_DEFAULT_DUMMY_VARIABLES
-        bool
-        default y
-        select STACK_SIZE_SET_BOARD
-        select LOG2_FILE_BLOCK_SIZE_SET_BOARD
-        select SELF_TEST_RESPONSE_WAIT_MS_SET_BOARD
-        select FILE_REQUEST_WAIT_MS_SET_BOARD
-        select OTA_AGENT_PRIORITY_SET_BOARD
-        select MAX_THINGNAME_LEN_SET_BOARD
-        select MAX_NUM_BLOCKS_REQUEST_SET_BOARD
-        select MAX_NUM_REQUEST_MOMENTUM_SET_BOARD
-        select MAX_NUM_OTA_DATA_BUFFERS_SET_BOARD
-        select ALLOW_DOWNGRADE_SET_BOARD
-        select ENABLED_CONTROL_PROTOCOLS_SET_BOARD
-        select ENABLED_DATA_PROTOCOLS_SET_BOARD
-        select PRIMARY_DATA_PROTOCOL_SET_BOARD
-endif
+CONFIG_STACK_SIZE=3584
+CONFIG_LOG2_FILE_BLOCK_SIZE=10
+CONFIG_SELF_TEST_RESPONSE_WAIT_MS=16000
+CONFIG_FILE_REQUEST_WAIT_MS=10000
+CONFIG_OTA_AGENT_PRIORITY=0
+CONFIG_MAX_THINGNAME_LEN=64
+CONFIG_MAX_NUM_BLOCKS_REQUEST=8
+CONFIG_MAX_NUM_REQUEST_MOMENTUM=32
+CONFIG_MAX_NUM_OTA_DATA_BUFFERS=2
+CONFIG_ALLOW_DOWNGRADE=n
+CONFIG_ENABLED_CONTROL_PROTOCOLS_MQTT=y
+CONFIG_ENABLED_CONTROL_PROTOCOLS_HTTP=n
+CONFIG_ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT=n
+CONFIG_ENABLED_DATA_PROTOCOLS_MQTT=n
+CONFIG_ENABLED_DATA_PROTOCOLS_HTTP=n
+CONFIG_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT=y
+CONFIG_PRIMARY_DATA_PROTOCOLS_MQTT=y
+CONFIG_PRIMARY_DATA_PROTOCOLS_HTTP=n
