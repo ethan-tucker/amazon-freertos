@@ -1,6 +1,6 @@
 if OTA_ENABLED
 
-menu "Ota library configuration"
+menu "OTA library configuration options"
 
 config STACK_SIZE
     int "Stack size"

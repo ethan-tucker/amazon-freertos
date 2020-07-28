@@ -17,15 +17,10 @@ menu "Board Properties"
         bool "Wifi enabled"
 endmenu
 
-
-source "../../libraries/freertos_plus/aws/ota/KConfig"
-
-
-menu "Mqtt library configuration"
-    config JUST_FOR_SHOW
-        bool "placeholder"
+menu "Libary configurations"
+    # sourcing library configuration
+    source "../../libraries/*/*/*/KConfig"
 endmenu
-
 
 menu "WiFi configuration"
 depends on WIFI_ENABLED
