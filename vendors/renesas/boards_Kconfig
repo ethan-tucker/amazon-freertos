@@ -1,6 +1,0 @@
-config BOARD_rx65n-rsk
-        bool "renesas rx65n-rsk"
-
-if BOARD_rx65n-rsk
-        rsource "boards/rx65n-rsk/Kconfig"
-endif

@@ -1,6 +1,0 @@
-config BOARD_nrf52840-dk
-        bool "nordic nrf52840-dk"
-
-if BOARD_nrf52840-dk
-        rsource "boards/nrf52840-dk/Kconfig"
-endif

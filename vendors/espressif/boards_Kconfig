@@ -1,6 +1,0 @@
-config BOARD_esp32
-    bool "Espressif esp32"
-
-if BOARD_esp32
-    rsource "boards/esp32/Kconfig"
-endif
