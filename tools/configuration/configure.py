@@ -62,8 +62,7 @@ def boardChoiceMenu(vendors, boards):
 def formatFunctionDeclarations(config_filepath):
     print()
     with open(config_filepath, "r") as config_file,\
-         open("outfile", "w") as outfile:
-        print("-----printing functions-----")
+         open("../../build/kconfig/kconfig.h", "w") as outfile:
         for line in config_file.readlines():
             
             # find all config options that are functions
@@ -76,7 +75,10 @@ def formatFunctionDeclarations(config_filepath):
 def boardConfiguration():
     subprocess.run(["guiconfig"])
     print("-----Finished configuring-----")
-    subprocess.run(["genconfig", "--header-path=kconfig.h"])
+
+    # The header file created by genconfig will be put in the file temp.h. It is almost fully formatted,
+    # but still treats macro functions as strings. The fully formatted header will be located in kconfig.h
+    subprocess.run(["genconfig", "--header-path=temp.h"])
 
 
 def loadCurrentBoardChoice():
@@ -97,7 +99,7 @@ def main():
     # sets the prefix to the generated config variables, this defualts to 'CONFIG_' which is unecesary
     board_chosen = False
     currentBoardChoice = loadCurrentBoardChoice()
-    config_filepath = "kconfig.h"
+    config_filepath = "temp.h"
     if(currentBoardChoice):
         board_chosen = True
     choice = ""

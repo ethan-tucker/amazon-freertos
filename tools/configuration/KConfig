@@ -1,8 +1,4 @@
 # Variable defaults that determine whether or not a board has certain capabilities. These values are overwritten
-config ALWAYS_FALSE
-    bool 
-    default n
-
 menu "Board Properties"
     config OTA_ENABLED
         bool "Ota enabled"
