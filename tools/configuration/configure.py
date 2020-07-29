@@ -1,6 +1,7 @@
 import subprocess
 import os.path
 import kconfiglib
+import re
 
 def getBoardChoice(boards, vendor_idx):
     print("\n-----BOARDS-----")
@@ -53,14 +54,29 @@ def boardChoiceMenu(vendors, boards):
     ota_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/ota_Kconfig"
     board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
 
-    subprocess.run(["py","merge_config.py", "KConfig", ".config", ota_board_config, board_properties])
+    subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, board_properties])
     f = open("boardChoice.csv", "w")
     f.write(vendor_name + "," + board)
+
+
+def formatFunctionDeclarations(config_filepath):
+    print()
+    with open(config_filepath, "r") as config_file,\
+         open("outfile", "w") as outfile:
+        print("-----printing functions-----")
+        for line in config_file.readlines():
+            
+            # find all config options that are functions
+            if line.split(" ")[1].split("_")[-1] == 'FUNC':
+                # remove the quotations around the string value
+                line = line.replace("\"","")
+            outfile.write(line)
 
 
 def boardConfiguration():
     subprocess.run(["guiconfig"])
     print("-----Finished configuring-----")
+    subprocess.run(["genconfig", "--header-path=kconfig.h"])
 
 
 def loadCurrentBoardChoice():
@@ -81,6 +97,7 @@ def main():
     # sets the prefix to the generated config variables, this defualts to 'CONFIG_' which is unecesary
     board_chosen = False
     currentBoardChoice = loadCurrentBoardChoice()
+    config_filepath = "kconfig.h"
     if(currentBoardChoice):
         board_chosen = True
     choice = ""
@@ -100,6 +117,7 @@ def main():
             board_chosen = True
         elif(choice == "2" and board_chosen):
             boardConfiguration()
+            formatFunctionDeclarations(config_filepath)
         elif(choice == "3"):
             pass
         else:
