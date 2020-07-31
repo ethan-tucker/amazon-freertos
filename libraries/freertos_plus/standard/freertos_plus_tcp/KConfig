@@ -8,39 +8,39 @@ if TCP_ENABLED
             config IP_TASK_SIZE_WORDS
                 int "IP Task size words"
 
-            config USE_NETWORK_EVENT_HOOK
+            config IP_USE_NETWORK_EVENT_HOOK
                 bool "Use network event hook"
 
-            config EVENT_QUEUE_LENGTH
+            config IP_EVENT_QUEUE_LENGTH
                 int "Event queue length"
                 help
                     Must be at least NUM_NETWORK_BUFFER_DESCRIPTORS + 5
         endmenu
 
         menu "Debug, trace, and logging settings"
-            config HAS_DEBUG_PRINTF
+            config IP_HAS_DEBUG_PRINTF
                 bool "Has debug printf"
 
-            config FREERTOS_DEBUB_PRINTF_FUNC
+            config IP_FREERTOS_DEBUB_PRINTF_FUNC
                 string "FreeRTOS debub printf"
                 depends on HAS_DEBUG_PRINTF
 
-            config HAS_PRINTF
+            config IP_HAS_PRINTF
                 bool "Has printf"
 
-            config FREERTOS_PRINTF_FUNC
+            config IP_FREERTOS_PRINTF_FUNC
                 string "FreeRTOS printf"
                 depends on HAS_PRINTF
 
-            config TCP_MAY_LOG_PORT_FUNC
+            config IP_TCP_MAY_LOG_PORT_FUNC
                 string "TCP may log port"
                 default "#define TCP_MAY_LOG_PORT(xPort) ( ( xPort ) != 23U )"
 
-            config CHECK_IP_QUEUE_SPACE
+            config IP_CHECK_IP_QUEUE_SPACE
                 bool "Check IP queue space"
                 default n
 
-            config WATCHDOG_TIMER_FUNC
+            config IP_WATCHDOG_TIMER_FUNC
                 string
                 default ""
         endmenu
@@ -49,113 +49,113 @@ if TCP_ENABLED
             choice BYTE_ORDER
                 bool "Byte order"
 
-                config pdFREERTOS_BIG_ENDIAN
+                config IP_pdFREERTOS_BIG_ENDIAN
                     bool "FreeRTOS big endian"
 
-                config pdFREERTOS_LITTLE_ENDIAN
+                config IP_pdFREERTOS_LITTLE_ENDIAN
                     bool "FreeRTOS little endian"
         
             endchoice
 
-            config DRIVER_INCLUDED_TX_IP_CHECKSUM
+            config IP_DRIVER_INCLUDED_TX_IP_CHECKSUM
                 bool "Driver included tx ip checksum"
                 default n
 
-            config DRIVER_INCLUDED_RX_IP_CHECKSUM
+            config IP_DRIVER_INCLUDED_RX_IP_CHECKSUM
                 bool "Driver included rx ip checksum"
                 default n
 
-            config ETHERNET_DRIVER_FILTERS_FRAME_TYPES
+            config IP_ETHERNET_DRIVER_FILTERS_FRAME_TYPES
                 bool "Ethernet driver filters frame types"
                 default n
 
-            config ETHERNET_DRIVER_FILTERS_PACKETS
+            config IP_ETHERNET_DRIVER_FILTERS_PACKETS
                 bool "Ethernt driver filters packets"
                 default n
 
-            config NETWORK_MTU
+            config IP_NETWORK_MTU
                 int "Network MTU"
                 default 1500
                 range 46 1500
 
-            config NUM_NETWORK_BUFFER_DESCRIPTORS
+            config IP_NUM_NETWORK_BUFFER_DESCRIPTORS
                 int "Num network buffer descriptors"
                 default 45
 
-            config FILTER_OUT_NON_ETHERNET_II_FRAMES
+            config IP_FILTER_OUT_NON_ETHERNET_II_FRAMES
                 bool "Filets out non ethernet II frames"
                 default y
 
-            config USE_LINKED_RX_MESSAGES
+            config IP_USE_LINKED_RX_MESSAGES
                 bool "Use linked RX messages"
                 default 0
             
-            config ZERO_COPY_TX_DRIVERS
+            config IP_ZERO_COPY_TX_DRIVERS
                 bool "Zero copy TX drivers"
                 default 0
 
-            config BUFFER_PADDING
+            config IP_BUFFER_PADDING
                 int "Buffer padding"
                 default 0
 
-            config PACKET_FILLING_SIZE
+            config IP_PACKET_FILLING_SIZE
                 int "Packet filling size"
                 default 2
         endmenu
 
         menu "TCP specific constants"
 
-            config USE_TCP
+            config IP_USE_TCP
                 bool "Use TCP"
                 default y
             
-            if USE_TCP
-                config USE_TCP_WIN
+            if IP_USE_TCP
+                config IP_USE_TCP_WIN
                     bool "Use TCP win"
                     default y
 
-                config TCP_WIN_SEG_COUNT
+                config IP_TCP_WIN_SEG_COUNT
                     int "TCP win seg count"
                     default 256
-                    depends on USE_TCP_WIN
+                    depends on IP_USE_TCP_WIN
                 
-                config IGNORE_UNKNOWN_PACKETS
+                config IP_IGNORE_UNKNOWN_PACKETS
                     bool "Ignore unkown packets"
                     default n
             
             endif
 
-            config TCP_TIME_TO_LIVE
+            config IP_TCP_TIME_TO_LIVE
                 int "TCP time to live"
                 default 128
 
-            config TCP_RX_BUFFER_LENGTH
+            config IP_TCP_RX_BUFFER_LENGTH
                 int "TCP RX buffer length"
 
-            config TCP_TX_BUFFER_LENGTH
+            config IP_TCP_TX_BUFFER_LENGTH
                 int "TCP TX buffer length"
 
-            config USE_TCP_TIMSTAMPS
+            config IP_USE_TCP_TIMSTAMPS
                 bool "Use TCP timestamps"
 
-            config TCP_MSS
+            config IP_TCP_MSS
                 int "TCP MSS"
 
-            config TCP_KEEP_ALIVE
+            config IP_TCP_KEEP_ALIVE
                 bool "TCP keep alive"
                 default n
 
-            config TCP_KEEP_ALIVE_INTERVAL
+            config IP_TCP_KEEP_ALIVE_INTERVAL
                 int "TCP keep alive interval"
-                depends on TCP_KEEP_ALIVE
+                depends on IP_TCP_KEEP_ALIVE
                 help
                     Value entered is in seconds.
 
-            config TCP_HANG_PROTECTION
+            config IP_TCP_HANG_PROTECTION
                 bool "TCP hang protection"
                 default y
 
-            config TCP_HANG_PROTECTION_TIME
+            config IP_TCP_HANG_PROTECTION_TIME
                 int "TCP hang protection time"
                 default 30
                 depends on TCP_HANG_PROTECTION
@@ -165,152 +165,152 @@ if TCP_ENABLED
         endmenu
 
         menu "UDP Specific Constants"
-            config UDP_TIME_TO_LIVE
+            config IP_UDP_TIME_TO_LIVE
                 int "UDP time to live"
                 default 128
 
-            config UDP_MAX_SEND_BLOCK_TIME_TICKS
+            config IP_UDP_MAX_SEND_BLOCK_TIME_TICKS
                 int "UDP max send block time ticks"
                 help
                     Value entered is in milliseconds.
 
-            config UDP_MAX_RX_PACKETS
+            config IP_UDP_MAX_RX_PACKETS
                 int "UDP max rx packets"
                 default 0
         endmenu
 
         menu "Other constants effecting socket behavior"
-            config INCLUDE_FULL_INET_ADDR
+            config IP_INCLUDE_FULL_INET_ADDR
                 bool "Include full inet addr"
                 default y
 
-            config ALLOW_SOCKET_SEND_WITHOUT_BIND
+            config IP_ALLOW_SOCKET_SEND_WITHOUT_BIND
                 bool "Allow socket send without bind"
                 default y
 
-            config SOCK_DEFUALT_REVIEVE_BLOCK_TIME
-                int "Socket default recieve block time"
+            config IP_SOCK_DEFAULT_RECEIVE_BLOCK_TIME
+                int "Socket default receive block time"
 
-            config SOCK_DEFAULT_SEND_BLOCK_TIME
+            config IP_SOCK_DEFAULT_SEND_BLOCK_TIME
                 int "Socket default send block time"
 
-            config SOCKET_HAS_USER_SEMAPHORE
+            config IP_SOCKET_HAS_USER_SEMAPHORE
                 bool "Socket has user semaphore"
                 default n
 
-            config SUPPORT_SINGALS
+            config IP_SUPPORT_SINGALS
                 bool "Support signals"
                 default n
 
-            config SUPPORT_SELECT_FUNCTION
+            config IP_SUPPORT_SELECT_FUNCTION
                 bool "Support select function"
                 default n
         endmenu
 
         menu "Constants affecting the ARP behavior"
-            config ARP_CACHE_ENTRIES
+            config IP_ARP_CACHE_ENTRIES
                 int "ARP cache entries"
                 default 10
 
-            config MAX_ARP_RETRANSMISSIONS
+            config IP_MAX_ARP_RETRANSMISSIONS
                 int "Max ARP retransmissions"
                 default 5
 
-            config MAX_ARP_AGE
+            config IP_MAX_ARP_AGE
                 int "Max ARP age"
                 default 150
                 help 
                     Value is in 10s of seconds
 
-            config ARP_REVERSED_LOOKUP
+            config IP_ARP_REVERSED_LOOKUP
                 bool "ARP reversed lookup"
                 default n
 
-            config ARP_STORES_REMOTE_ADDRESSES
+            config IP_ARP_STORES_REMOTE_ADDRESSES
                 bool "ARP stores remote addresses"
                 default n
 
-            config USE_ARP_REVERSED_LOOKUP
+            config IP_USE_ARP_REVERSED_LOOKUP
                 bool "Use ARP reversed lookup"
                 default n
 
-            config USE_ARP_REMOVE_ENTRY
+            config IP_USE_ARP_REMOVE_ENTRY
                 bool "Use ARP remove entry"
                 default n
         endmenu
 
         menu "Constants affecting DHCP and name service behavior"
-            config USE_DNS
+            config IP_USE_DNS
                 bool "Use DNS"
                 default y
 
-            if USE_DNS
-                config USE_LLMR
+            if IP_USE_DNS
+                config IP_USE_LLMR
                     bool "Use LLMR"
                     default n
 
-                config USE_NBNS
+                config IP_USE_NBNS
                     bool "Use NBNS"
                     default n
             endif
 
-            config USE_DNS_CACHE
+            config IP_USE_DNS_CACHE
                 bool "Use DNS cache"
                 default y
 
-            if USE_DNS_CACHE
-                config DNS_CACHE_ENTRIES
+            if IP_USE_DNS_CACHE
+                config IP_DNS_CACHE_ENTRIES
                     bool "DNS cache entries"
                     default y
 
-                config DNS_CACHE_NAME_LENGTH
+                config IP_DNS_CACHE_NAME_LENGTH
                     int "DNS cache name length"
                     default 254
             endif
 
-            config DNS_REQUEST_ATTEMPTS
+            config IP_DNS_REQUEST_ATTEMPTS
                 int "DNS request attempts"
                 default 5
 
-            config USE_DHCP
+            config IP_USE_DHCP
                 bool "Use DHCP"
                 default y
 
-            config MAXIMUM_DISCOVER_TX_PERIOD
+            config IP_MAXIMUM_DISCOVER_TX_PERIOD
                 int "Maximum discover TX period"
                 help
                     Value entered in ticks.
 
-            config USE_DHCP_HOOK
+            config IP_USE_DHCP_HOOK
                 bool "Use DHCP hook"
                 default n
 
-            config DHCP_REGISTER_HOSTNAME
+            config IP_DHCP_REGISTER_HOSTNAME
                 bool "DHCP register hostname"
                 default n
         endmenu
 
         menu "Constants affecting IP and ICMP behavior"
-            config CAN_FRAGMENT_OUTGOING_PACKETS
+            config IP_CAN_FRAGMENT_OUTGOING_PACKETS
                 bool "Can fragment outgoing packets"
 
-            config REPLY_TO_INCOMING_PINGS
+            config IP_REPLY_TO_INCOMING_PINGS
                 bool "Reply to incoming pings"
-                default 1
+                default y
             
-            config SUPPORT_OUTGOING_PINGS
+            config IP_SUPPORT_OUTGOING_PINGS
                 bool "Support outgoing pings"
-                default 0
+                default n
         endmenu
 
         menu "Constants providing target support"
-            config RAND32_FUNC
+            config IP_RAND32_FUNC
                 string "Rand32"
                 default "rand()"
 
-            config HAS_INLINE_FUNCTIONS
+            config IP_HAS_INLINE_FUNCTIONS
                 bool "Has inline functions"
-                default 1
+                default y
         endmenu
     endmenu
 endif

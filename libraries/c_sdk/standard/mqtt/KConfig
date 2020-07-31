@@ -1,25 +1,25 @@
 if MQTT_ENABLED
 
     menu "MQTT library configuration options"
-    config LIBRARY_LOG_NAME
+    config MQTT_LIBRARY_LOG_NAME
         string "Library log name"
 
-    choice LIBRARY_LOG_LEVEL
+    choice MQTT_LIBRARY_LOG_LEVEL
         bool "Library log level"
 
-        config LOG_NONE
+        config MQTT_LOG_NONE
             bool "LOG_NONE"
 
-        config LOG_ERROR
+        config MQTT_LOG_ERROR
             bool "LOG_ERROR"
 
-        config LOG_WARN
+        config MQTT_LOG_WARN
             bool "LOG_WARN"
 
-        config LOG_INFO
+        config MQTT_LOG_INFO
             bool "LOG_INFO"
 
-        config LOG_DEBUG
+        config MQTT_LOG_DEBUG
             bool "LOG_DEBUG"
     endchoice
 

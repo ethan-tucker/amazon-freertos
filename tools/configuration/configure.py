@@ -52,9 +52,10 @@ def boardChoiceMenu(vendors, boards):
     board = getBoardChoice(boards, vendorIdx)
 
     ota_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/ota_Kconfig"
+    IP_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/FreeRTOSIP_Kconfig"
     board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
 
-    subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, board_properties])
+    subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
     f = open("boardChoice.csv", "w")
     f.write(vendor_name + "," + board)
 

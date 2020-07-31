@@ -2,18 +2,18 @@ if OTA_ENABLED
 
 menu "OTA library configuration options"
 
-config STACK_SIZE
+config OTA_STACK_SIZE
     int "Stack size"
 
-config LOG2_FILE_BLOCK_SIZE
+config OTA_LOG2_FILE_BLOCK_SIZE
     int "Log 2 file block size"
     default 10
 
-config SELF_TEST_RESPONSE_WAIT_MS
+config OTA_SELF_TEST_RESPONSE_WAIT_MS
     int "Self test response wait (milliseconds)"
     default 16000
 
-config FILE_REQUEST_WAIT_MS
+config OTA_FILE_REQUEST_WAIT_MS
     int "File request wait (milliseconds)"
     default 10000
 
@@ -23,49 +23,49 @@ config OTA_AGENT_PRIORITY
     help
         0 is the lowest priority.
 
-config MAX_THINGNAME_LEN
+config OTA_MAX_THINGNAME_LEN
     int "Max thingname length"
     default 64
 
-config MAX_NUM_BLOCKS_REQUEST
+config OTA_MAX_NUM_BLOCKS_REQUEST
     int "Max num of blocks requested"
     default 1
 
-config MAX_NUM_REQUEST_MOMENTUM
+config OTA_MAX_NUM_REQUEST_MOMENTUM
     int "Max num request momentum"
     default 32
 
-config MAX_NUM_OTA_DATA_BUFFERS
+config OTA_MAX_NUM_OTA_DATA_BUFFERS
     int "Max num OTA data buffers"
     default 4
 
-config ALLOW_DOWNGRADE
+config OTA_ALLOW_DOWNGRADE
     bool "Allow downgrades"
 
 choice ENABLED_CONTROL_PROTOCOLS
     bool "Enabled control protocols" 
 
-    config ENABLED_CONTROL_PROTOCOLS_MQTT
+    config OTA_ENABLED_CONTROL_PROTOCOLS_MQTT
         bool "OTA data over MQTT"
         
 
-    config ENABLED_CONTROL_PROTOCOLS_HTTP
+    config OTA_ENABLED_CONTROL_PROTOCOLS_HTTP
         bool "OTA data over HTTP"
 
-    config ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT
+    config OTA_ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT
         bool "OTA data over HTTP and MQTT"
 endchoice
 
 choice ENABLED_DATA_PROTOCOLS
     bool "Enabled data protocols"
 
-    config ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT
+    config OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT
         bool "OTA data over HTTP and MQTT"
 
-    config ENABLED_DATA_PROTOCOLS_HTTP
+    config OTA_ENABLED_DATA_PROTOCOLS_HTTP
         bool "OTA data over HTTP"
 
-    config ENABLED_DATA_PROTOCOLS_MQTT
+    config OTA_ENABLED_DATA_PROTOCOLS_MQTT
         bool "OTA data over MQTT"
 
 endchoice
@@ -73,13 +73,13 @@ endchoice
 choice PRIMARY_DATA_PROTOCOL
     bool "Select a primary data protocol"
 
-    config PRIMARY_DATA_PROTOCOLS_MQTT
+    config OTA_PRIMARY_DATA_PROTOCOLS_MQTT
         bool "MQTT as primary data protocol"
-        depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || ENABLED_DATA_PROTOCOLS_MQTT)
+        depends on (OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || OTA_ENABLED_DATA_PROTOCOLS_MQTT)
 
-    config PRIMARY_DATA_PROTOCOLS_HTTP
+    config OTA_PRIMARY_DATA_PROTOCOLS_HTTP
         bool "HTTP as primary data protocol"
-        depends on (ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || ENABLED_DATA_PROTOCOLS_HTTP)
+        depends on (OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || OTA_ENABLED_DATA_PROTOCOLS_HTTP)
 endchoice
 endmenu
 endif
