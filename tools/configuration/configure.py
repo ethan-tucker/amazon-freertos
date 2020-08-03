@@ -72,6 +72,9 @@ def formatFunctionDeclarations(config_filepath):
                 line = line.replace("\"","")
             outfile.write(line)
 
+    # removes the temporary partially formatted header
+    os.remove(config_filepath)
+
 
 def boardConfiguration():
     subprocess.run(["guiconfig"])
