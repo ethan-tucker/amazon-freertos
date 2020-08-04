@@ -2,66 +2,67 @@ import subprocess
 import os.path
 import kconfiglib
 import re
+from collections import OrderedDict
 
-def getBoardChoice(boards, vendor_idx):
-    print("\n-----BOARDS-----")
-    
-    for board_idx in range(len(boards[vendor_idx])):
-        print("%s) %s" %(board_idx+1, boards[vendor_idx][board_idx]))
-    
-    board = input("\nSelect your board (by number): ")
-    valid = False
-    while not valid:
-        if(board.isdigit()):
-            board_int = int(board)
-            if(board_int < 1 or board_int > len(boards[vendor_idx])):
-                board = input("\nSelect your vendor (please enter a valid number): ")
+
+def getValidUserInput(options, max_acceptable_value, error_message):
+    user_input = input("\n%s (by number): "%(error_message))
+    # This loop will run until the user has entered a valid selection. At that point the function will return the name of the board chosen.
+    while 1:
+        if(user_input.isdigit()):
+            user_input_int = int(user_input)
+            if(user_input_int < 1 or user_input_int > max_acceptable_value):
+                user_input = input("\n%s (please enter a valid number): "%(error_message))
             else:
-                valid = True
+                return options[user_input_int-1]
         else:
-            board = input("\nSelect your vendor (please enter a number): ")
-    return boards[vendor_idx][board_int-1]
+            user_input = input("\n%s (please enter a number): "%(error_message))
 
 
-def getVendorChoice(vendors):
-    print("\n-----VENDORS-----")
-    for vendor_idx in range(len(vendors)):
-        print("%s) %s" %(vendor_idx+1, vendors[vendor_idx]))
+def getBoardChoice(boards):
+    print("\n-----CHOOSE A BOARD-----")
     
-    vendor = input("\nSelect your vendor (by number): ")
-    valid = False
-    while not valid:
-        if(vendor.isdigit()):
-            vendor_int = int(vendor)
-            if(vendor_int < 1 or vendor_int > len(vendors)):
-                vendor = input("\nSelect your vendor (please enter a valid number): ")
-            else:
-                valid = True
-        else:
-            vendor = input("\nSelect your vendor (please enter a number): ")
-
-    return (vendor_int-1, vendors[vendor_int-1])
+    for idx, board in enumerate(boards, start=1):
+        print("%s) %s" %(idx, board))
+    
+    return getValidUserInput(boards, len(boards), "Select your board")
 
 
-def boardChoiceMenu(vendors, boards):
-    ota_library_config = "../../libraries/freertos_plus/aws/ota/KConfig"
+def getVendorChoice(boards_dict):
+    print("\n-----CHOOSE A VENDOR-----")
 
-    vendor = getVendorChoice(vendors)
-    vendorIdx = vendor[0]
-    vendor_name = vendor[1]
-    board = getBoardChoice(boards, vendorIdx)
+    # vendors in a list of touples. The first item in each touple is the vendor and the second item is a list of boards corresponding to that vendor
+    vendors = list(boards_dict.items())
+    for idx, vendor in enumerate(vendors, start=1):
+        print("%s) %s" %(idx, vendor[0]))
+    
+    return getValidUserInput(vendors, len(vendors), "Select your vendor")
 
+
+def boardChoiceMenu(boards_dict):
+    vendor = getVendorChoice(boards_dict)
+    vendor_name = vendor[0]
+    boards = vendor[1]
+    board = getBoardChoice(boards)
+    
+    # These are the file paths for the configuration files associated with the vendor and board combo the user chose
     ota_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/ota_Kconfig"
     IP_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/FreeRTOSIP_Kconfig"
     board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
 
+    # This runs merge config with all of the configruation files associated with the chosen board. This created a heirarchy of defaults in which
+    # the values assigned int the board configuration files take precedence over those set in the library files (these are included in the file "KConfig").
+    # The output of this process is the .config file. This is the intermediate step. When the genconfig command is run it uses this .config file to generate 
+    # a new KConfig.h file.
     subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
-    f = open("boardChoice.csv", "w")
-    f.write(vendor_name + "," + board)
+
+    # This is writing the users board choice out to a "database" file. This keeps track of the last board the user has configured in between runs of the program.
+    with open("boardChoice.csv", "w") as database_file:
+        database_file.write(vendor_name + "," + board)
 
 
+# This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. The fomatted file is outputted to build/kconfig/kconfig.h
 def formatFunctionDeclarations(config_filepath):
-    print()
     with open(config_filepath, "r") as config_file,\
          open("../../build/kconfig/kconfig.h", "w") as outfile:
         for line in config_file.readlines():
@@ -72,11 +73,15 @@ def formatFunctionDeclarations(config_filepath):
                 line = line.replace("\"","")
             outfile.write(line)
 
-    # removes the temporary partially formatted header
+    # removes the temporary partially formatted header (it was only needed for this intermediary step)
     os.remove(config_filepath)
 
 
+# This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
+# is used by the FreeRTOS source code
 def boardConfiguration():
+    # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
+    # file and the defaults are set by the values in the .config file. 
     subprocess.run(["guiconfig"])
     print("-----Finished configuring-----")
 
@@ -85,7 +90,9 @@ def boardConfiguration():
     subprocess.run(["genconfig", "--header-path=temp.h"])
 
 
+# This function checks whether or not the user has chosen a board in the past. If they have it returns the vendor and board they previously selected, if not it returns None.
 def loadCurrentBoardChoice():
+    # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("boardChoice.csv")):
         f = open("boardChoice.csv", "r")
         currentChoice = f.read().split(",")
@@ -96,29 +103,43 @@ def loadCurrentBoardChoice():
 
 
 def main():
-    vendors = ["cypress", "espressif", "infineon", "marvell", "mediatek", "microchip", "nordic", "nuvoton", "nxp", "pc", "renesas", "st", "ti", "xilinx"]
-    boards = [["CY8CKIT_064S0S2_4343W","CYW943907AEVAL1F","CYW954907AEVAL1F"], ["esp32"], ["xmc4800_iotkit","xmc4800_plus_optiga_trust_x"], ["mw300_rd"], ["mt7697hx-dev-kit"], \
-             ["curiosity_pic32mzef","ecc608a_plus_winsim"], ["nrf52840-dk"], ["numaker_iot_m487_wifi"], ["lpc54018iotmodule"], ["linux","windows"], ["rx65n-rsk"], ["stm32l475_discovery"], \
-             ["cc3220_launchpad"], ["microzed"]]
-    # sets the prefix to the generated config variables, this defualts to 'CONFIG_' which is unecesary
-    board_chosen = False
-    currentBoardChoice = loadCurrentBoardChoice()
+    # I used an ordered dict here so that it was easy to use/index as well as easy to add new vendor board combos.
+    boards_dict = OrderedDict(
+             [("cypress", ["CY8CKIT_064S0S2_4343W","CYW943907AEVAL1F","CYW954907AEVAL1F"]), 
+              ("espressif", ["esp32"]), 
+              ("infineon", ["xmc4800_iotkit","xmc4800_plus_optiga_trust_x"]), 
+              ("marvell", ["mw300_rd"]), 
+              ("mediatek", ["mt7697hx-dev-kit"]), 
+              ("microchip", ["curiosity_pic32mzef","ecc608a_plus_winsim"]), 
+              ("nordic", ["nrf52840-dk"]), 
+              ("nuvoton", ["numaker_iot_m487_wifi"]), 
+              ("nxp", ["lpc54018iotmodule"]), 
+              ("pc", ["linux","windows"]), 
+              ("renesas", ["rx65n-rsk"]), 
+              ("st", ["stm32l475_discovery"]), 
+              ("ti", ["cc3220_launchpad"]), 
+              ("xilinx", ["microzed"])])
     config_filepath = "temp.h"
+    board_chosen = False
+
+    # loadCurrentBoardChoice() checks if the user has chosen a board in the past. If they have not chosen a board before the "Configure demo" option 
+    # will not be available until they do so
+    currentBoardChoice = loadCurrentBoardChoice()
     if(currentBoardChoice):
         board_chosen = True
-    choice = ""
 
+    choice = ""
     while choice != "3":
-        print("\n-----FREERTOS Configuration-----")
+        print("-----FREERTOS Configuration-----\n")
         print("Options:")
         print("1) Choose a board")
         if(board_chosen):
             print("2) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
         print("3) Exit")
-        choice = input("What do you want to do?: ")
+        choice = input("\nWhat do you want to do?: ")
         
         if(choice == "1"):
-            boardChoiceMenu(vendors, boards)
+            boardChoiceMenu(boards_dict)
             currentBoardChoice = loadCurrentBoardChoice()
             board_chosen = True
         elif(choice == "2" and board_chosen):
