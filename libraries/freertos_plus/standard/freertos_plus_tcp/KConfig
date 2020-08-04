@@ -4,8 +4,13 @@ if TCP_ENABLED
         menu "Constants affecting the TCP/IP task execution behavior"
             config IP_TASK_PRIORITY
                 int "IP task priority"
+                help
+                    The priority is a standard FreeRTOS task priority. 
+                    The task priority is (configMAX_PRIORITIES - <user entered value>).
+                    The larger the user entered value the lower the priority.
 
-            config IP_TASK_SIZE_WORDS
+
+            config IP_TASK_STACK_SIZE_WORDS
                 int "IP Task size words"
 
             config IP_USE_NETWORK_EVENT_HOOK
@@ -21,16 +26,16 @@ if TCP_ENABLED
             config IP_HAS_DEBUG_PRINTF
                 bool "Has debug printf"
 
-            config IP_FREERTOS_DEBUB_PRINTF_FUNC
+            config IP_FREERTOS_DEBUG_PRINTF_FUNC
                 string "FreeRTOS debub printf"
-                depends on HAS_DEBUG_PRINTF
+                depends on IP_HAS_DEBUG_PRINTF
 
             config IP_HAS_PRINTF
                 bool "Has printf"
 
             config IP_FREERTOS_PRINTF_FUNC
                 string "FreeRTOS printf"
-                depends on HAS_PRINTF
+                depends on IP_HAS_PRINTF
 
             config IP_TCP_MAY_LOG_PORT_FUNC
                 string "TCP may log port"
