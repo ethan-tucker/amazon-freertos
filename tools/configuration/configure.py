@@ -20,7 +20,7 @@ def getValidUserInput(options, max_acceptable_value, error_message):
 
 
 def getBoardChoice(boards):
-    print("\n-----CHOOSE A BOARD-----")
+    print("\n-----CHOOSE A BOARD-----\n")
     
     for idx, board in enumerate(boards, start=1):
         print("%s) %s" %(idx, board))
@@ -29,7 +29,7 @@ def getBoardChoice(boards):
 
 
 def getVendorChoice(boards_dict):
-    print("\n-----CHOOSE A VENDOR-----")
+    print("\n-----CHOOSE A VENDOR-----\n")
 
     # vendors in a list of touples. The first item in each touple is the vendor and the second item is a list of boards corresponding to that vendor
     vendors = list(boards_dict.items())
@@ -50,12 +50,15 @@ def boardChoiceMenu(boards_dict):
     IP_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/FreeRTOSIP_Kconfig"
     board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
 
-    # This runs merge config with all of the configruation files associated with the chosen board. This created a heirarchy of defaults in which
+    # merg_config.py runs merge config with all of the configruation files associated with the chosen board. This created a heirarchy of defaults in which
     # the values assigned int the board configuration files take precedence over those set in the library files (these are included in the file "KConfig").
     # The output of this process is the .config file. This is the intermediate step. When the genconfig command is run it uses this .config file to generate 
     # a new KConfig.h file.
+    print("\n-----YOUR BOARD CHOICE-----\n")
+    print("Your choice was the %s %s"%(vendor_name, board))
+    print("\n-----MERGING CONFIGURATIONS FOR YOUR BOARD-----\n")
     subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
-
+    print()
     # This is writing the users board choice out to a "database" file. This keeps track of the last board the user has configured in between runs of the program.
     with open("boardChoice.csv", "w") as database_file:
         database_file.write(vendor_name + "," + board)
@@ -82,12 +85,17 @@ def formatFunctionDeclarations(config_filepath):
 def boardConfiguration():
     # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
     # file and the defaults are set by the values in the .config file. 
+    print("\n-----Running guiconfig-----\n")
+
     subprocess.run(["guiconfig"])
-    print("-----Finished configuring-----")
 
     # The header file created by genconfig will be put in the file temp.h. It is almost fully formatted,
     # but still treats macro functions as strings. The fully formatted header will be located in kconfig.h
+    print("\n-----Running genconfig-----\n")
+
     subprocess.run(["genconfig", "--header-path=temp.h"])
+
+    print("\n-----Finished configuring-----\n")
 
 
 # This function checks whether or not the user has chosen a board in the past. If they have it returns the vendor and board they previously selected, if not it returns None.
