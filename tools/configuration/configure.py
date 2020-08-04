@@ -1,5 +1,5 @@
 import subprocess
-import os.path
+import os
 import kconfiglib
 import re
 from collections import OrderedDict
@@ -110,6 +110,17 @@ def loadCurrentBoardChoice():
     return None
 
 
+def buildAndFlashBoard():
+    # This is currently a proof of concept with hard coded commands
+    os.chdir("../..")
+    print("-----GENERATING BUILD FILES-----")
+    subprocess.run(["cmake", "-D","VENDOR=espressif", "-D","BOARD=esp32_wrover_kit", "-D","COMPILER=xtensa-esp32", "-G","Ninja", "-S",".", "-B","build"])
+    print("-----BUILD PROJECT-----")
+    subprocess.run(["cmake", "--build","build"])
+    print("-----FLASHING THE BOARD AND RUNNING THE DEMO-----")
+    subprocess.run(["./vendors/espressif/esp-idf/tools/idf.py", "erase_flash", "flash", "monitor", "-p", "/dev/COM3", "-B", "build"])
+    os.chdir("tools/configuration")
+
 def main():
     # I used an ordered dict here so that it was easy to use/index as well as easy to add new vendor board combos.
     boards_dict = OrderedDict(
@@ -137,13 +148,14 @@ def main():
         board_chosen = True
 
     choice = ""
-    while choice != "3":
+    while choice != "4":
         print("-----FREERTOS Configuration-----\n")
         print("Options:")
         print("1) Choose a board")
         if(board_chosen):
             print("2) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
-        print("3) Exit")
+            print("3) Build and flash the demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
+        print("4) Exit")
         choice = input("\nWhat do you want to do?: ")
         
         if(choice == "1"):
@@ -153,7 +165,10 @@ def main():
         elif(choice == "2" and board_chosen):
             boardConfiguration()
             formatFunctionDeclarations(config_filepath)
-        elif(choice == "3"):
+        elif(choice == "3" and board_chosen):
+            print("\n-----This is when building a flashing would happen-----\n")
+            #buildAndFlashBoard()
+        elif(choice == "4"):
             pass
         else:
             print("Please choose a valid option")
