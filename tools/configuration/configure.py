@@ -2,6 +2,7 @@ import subprocess
 import os
 import kconfiglib
 import re
+import sys
 from collections import OrderedDict
 
 
@@ -57,7 +58,8 @@ def boardChoiceMenu(boards_dict):
     print("\n-----YOUR BOARD CHOICE-----\n")
     print("Your choice was the %s %s"%(vendor_name, board))
     print("\n-----MERGING CONFIGURATIONS FOR YOUR BOARD-----\n")
-    subprocess.run(["python3","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
+    sys.stdout.flush()
+    subprocess.run(["py","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
     print()
     # This is writing the users board choice out to a "database" file. This keeps track of the last board the user has configured in between runs of the program.
     with open("boardChoice.csv", "w") as database_file:
@@ -86,13 +88,13 @@ def boardConfiguration():
     # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
     # file and the defaults are set by the values in the .config file. 
     print("\n-----Running guiconfig-----\n")
-
+    sys.stdout.flush()
     subprocess.run(["guiconfig"])
 
     # The header file created by genconfig will be put in the file temp.h. It is almost fully formatted,
     # but still treats macro functions as strings. The fully formatted header will be located in kconfig.h
     print("\n-----Running genconfig-----\n")
-
+    sys.stdout.flush()
     subprocess.run(["genconfig", "--header-path=temp.h"])
 
     print("\n-----Finished configuring-----\n")
@@ -113,12 +115,15 @@ def loadCurrentBoardChoice():
 def buildAndFlashBoard():
     # This is currently a proof of concept with hard coded commands
     os.chdir("../..")
-    print("-----GENERATING BUILD FILES-----")
+    print("\n-----GENERATING BUILD FILES-----\n")
+    sys.stdout.flush()
     subprocess.run(["cmake", "-D","VENDOR=espressif", "-D","BOARD=esp32_wrover_kit", "-D","COMPILER=xtensa-esp32", "-G","Ninja", "-S",".", "-B","build"])
-    print("-----BUILD PROJECT-----")
+    print("\n-----BUILDING PROJECT-----\n")
+    sys.stdout.flush()
     subprocess.run(["cmake", "--build","build"])
-    print("-----FLASHING THE BOARD AND RUNNING THE DEMO-----")
-    subprocess.run(["./vendors/espressif/esp-idf/tools/idf.py", "erase_flash", "flash", "monitor", "-p", "/dev/COM3", "-B", "build"])
+    print("\n-----FLASHING THE BOARD AND RUNNING THE DEMO-----\n")
+    sys.stdout.flush()
+    subprocess.run(["py", "vendors/espressif/esp-idf/tools/idf.py", "erase_flash", "flash", "monitor", "-p", "COM3", "-B", "build"])
     os.chdir("tools/configuration")
 
 def main():
@@ -166,8 +171,8 @@ def main():
             boardConfiguration()
             formatFunctionDeclarations(config_filepath)
         elif(choice == "3" and board_chosen):
-            print("\n-----This is when building a flashing would happen-----\n")
-            #buildAndFlashBoard()
+            #print("\n-----This is when building a flashing would happen-----\n")
+            buildAndFlashBoard()
         elif(choice == "4"):
             pass
         else:

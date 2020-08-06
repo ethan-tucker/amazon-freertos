@@ -49,6 +49,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define ipconfigHAS_DEBUG_PRINTF                1
 #else
     #define ipconfigHAS_DEBUG_PRINTF                0
+#endif
 
 #if ( ipconfigHAS_DEBUG_PRINTF == 1 )
     #define FreeRTOS_debug_printf( X )    CONFIG_IP_FREERTOS_DEBUG_PRINTF_FUNC
@@ -62,6 +63,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define ipconfigHAS_PRINTF                1
 #else
     #define ipconfigHAS_PRINTF                0
+#endif
 
 #if ( ipconfigHAS_PRINTF == 1 )
     #define FreeRTOS_printf( X )    CONFIG_IP_FREERTOS_PRINTF_FUNC
@@ -73,8 +75,11 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * on).  Valid options are pdFREERTOS_BIG_ENDIAN and pdFREERTOS_LITTLE_ENDIAN. */
 #if defined( CONFIG_IP_pdFREERTOS_LITTLE_ENDIAN )
     #define ipconfigBYTE_ORDER                         pdFREERTOS_LITTLE_ENDIAN
+#endif
+
 #if defined( CONFIG_IP_pdFREERTOS_BIG_ENDIAN )
     #define ipconfigBYTE_ORDER                         pdFREERTOS_BIG_ENDIAN
+#endif
 
 /* If the network card/driver includes checksum offloading (IP/TCP/UDP checksums)
  * then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
@@ -83,12 +88,14 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM     1
 #else
     #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM     0
+#endif
 
 /* TX checksum offloading has NOT been implemented in the Wi-Fi of ESP32. */
 #if defined( CONFIG_IP_DRIVER_INCLUDED_TX_IP_CHECKSUM )
     #define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM     1
 #else
     #define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM     0
+#endif
 
 /* Several API's will block until the result is known, or the action has been
  * performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
@@ -108,6 +115,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
     #define ipconfigUSE_DNS_CACHE     1
 #else
     #define ipconfigUSE_DNS_CACHE     0
+#endif
 
 #define ipconfigDNS_CACHE_ADDRESSES_PER_ENTRY      ( 6 )
 #define ipconfigDNS_REQUEST_ATTEMPTS               ( CONFIG_IP_DNS_REQUEST_ATTEMPTS )
@@ -147,6 +155,7 @@ extern uint32_t ulRand();
     #define ipconfigUSE_NETWORK_EVENT_HOOK     1
 #else
     #define ipconfigUSE_NETWORK_EVENT_HOOK     0
+#endif
 
 /* Sockets have a send block time attribute.  If FreeRTOS_sendto() is called but
  * a network buffer cannot be obtained then the calling task is held in the Blocked
@@ -173,11 +182,13 @@ extern uint32_t ulRand();
     #define ipconfigUSE_DHCP     1
 #else
     #define ipconfigUSE_DHCP     0
+#endif
 
 #if defined( CONFIG_IP_DHCP_REGISTER_HOSTNAME )
     #define ipconfigDHCP_REGISTER_HOSTNAME     1
 #else
     #define ipconfigDHCP_REGISTER_HOSTNAME     0
+#endif
 
 #define ipconfigDHCP_USES_UNICAST                1
 
@@ -188,6 +199,7 @@ extern uint32_t ulRand();
     #define ipconfigUSE_DHCP_HOOK     1
 #else
     #define ipconfigUSE_DHCP_HOOK     0
+#endif
 
 /* When ipconfigUSE_DHCP is set to 1, DHCP requests will be sent out at
  * increasing time intervals until either a reply is received from a DHCP server
@@ -236,6 +248,7 @@ extern uint32_t ulRand();
     #define ipconfigINCLUDE_FULL_INET_ADDR     1
 #else
     #define ipconfigINCLUDE_FULL_INET_ADDR     0
+#endif
 
 /* ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS defines the total number of network buffer that
  * are available to the IP stack.  The total number of network buffers is limited
@@ -251,6 +264,7 @@ extern uint32_t ulRand();
     #error "The event queue must be a minimum of 5 greater than the total number of network buffers."
 #else
     #define ipconfigEVENT_QUEUE_LENGTH ( CONFIG_IP_EVENT_QUEUE_LENGTH )
+#endif
 
 /* The address of a socket is the combination of its IP address and its port
  * number.  FreeRTOS_bind() is used to manually allocate a port number to a socket
@@ -268,6 +282,7 @@ extern uint32_t ulRand();
     #define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND     1
 #else
     #define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND     0
+#endif
 
 /* Defines the Time To Live (TTL) values used in outgoing UDP packets. */
 #define ipconfigUDP_TIME_TO_LIVE                       CONFIG_IP_UDP_TIME_TO_LIVE
@@ -279,12 +294,14 @@ extern uint32_t ulRand();
     #define ipconfigUSE_TCP     1
 #else
     #define ipconfigUSE_TCP     0
+#endif
 
 /* USE_WIN: Let TCP use windowing mechanism. */
 #if defined( CONFIG_IP_USE_TCP_WIN )
     #define ipconfigUSE_TCP_WIN     1
 #else
     #define ipconfigUSE_TCP_WIN     0
+#endif
 
 /* The MTU is the maximum number of bytes the payload of a network frame can
  * contain.  For normal Ethernet V2 frames the maximum MTU is 1500.  Setting a
@@ -297,6 +314,7 @@ extern uint32_t ulRand();
     #define ipconfigUSE_DNS     1
 #else
     #define ipconfigUSE_DNS     0
+#endif
 
 /* If ipconfigREPLY_TO_INCOMING_PINGS is set to 1 then the IP stack will
  * generate replies to incoming ICMP echo (ping) requests. */
@@ -304,6 +322,7 @@ extern uint32_t ulRand();
     #define ipconfigREPLY_TO_INCOMING_PINGS     1
 #else
     #define ipconfigREPLY_TO_INCOMING_PINGS     0
+#endif
 
 /* If ipconfigSUPPORT_OUTGOING_PINGS is set to 1 then the
  * FreeRTOS_SendPingRequest() API function is available. */
@@ -311,6 +330,7 @@ extern uint32_t ulRand();
     #define ipconfigSUPPORT_OUTGOING_PINGS     1
 #else
     #define ipconfigSUPPORT_OUTGOING_PINGS     0
+#endif
 
 /* If ipconfigSUPPORT_SELECT_FUNCTION is set to 1 then the FreeRTOS_select()
  * (and associated) API function is available. */
@@ -318,6 +338,7 @@ extern uint32_t ulRand();
     #define ipconfigSUPPORT_SELECT_FUNCTION     1
 #else
     #define ipconfigSUPPORT_SELECT_FUNCTION     0
+#endif
 
 /* If ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES is set to 1 then Ethernet frames
  * that are not in Ethernet II format will be dropped.  This option is included for
@@ -326,6 +347,7 @@ extern uint32_t ulRand();
     #define ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES     1
 #else
     #define ipconfigFILTER_OUT_NON_ETHERNET_II_FRAMES     0
+#endif
 
 /* If ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES is set to 1 then it is the
  * responsibility of the Ethernet interface to filter out packets that are of no
@@ -339,6 +361,7 @@ extern uint32_t ulRand();
     #define ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES     1
 #else
     #define ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES     0
+#endif
 
 /* The windows simulator cannot really simulate MAC interrupts, and needs to
  * block occasionally to allow other tasks to run. */
@@ -372,6 +395,8 @@ extern uint32_t ulRand();
     #define ipconfigTCP_KEEP_ALIVE     ( 1 )
 #else
     #define ipconfigTCP_KEEP_ALIVE     ( 0 )
+#endif
+
 #define ipconfigTCP_KEEP_ALIVE_INTERVAL          ( CONFIG_IP_TCP_KEEP_ALIVE_INTERVAL ) /* Seconds. */
 
 /* The socket semaphore is used to unblock the MQTT task. */
@@ -379,6 +404,7 @@ extern uint32_t ulRand();
     #define ipconfigSOCKET_HAS_USER_SEMAPHORE     ( 1 )
 #else
     #define ipconfigSOCKET_HAS_USER_SEMAPHORE     ( 0 )
+#endif
 
 #define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK    ( 1 )
 #define ipconfigUSE_CALLBACKS                    ( 0 )
