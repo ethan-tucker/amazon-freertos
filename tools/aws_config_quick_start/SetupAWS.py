@@ -30,7 +30,8 @@ def prereq():
         json_text = json.load(file)
 
     # Validate that the entries in the JSON are valid.
-    validate_json_text(json_text)
+    # validate_json_text(json_text)
+    # This validation 
 
     # Create a Thing
     thing_name = json_text['thing_name']
@@ -83,6 +84,39 @@ def prereq():
         # Attach policy to certificate
         cert_obj.attach_policy(policy_name)
         print("Completed prereq operation!")
+
+
+def update_client_credential_keys_kconfig():
+    with open('configure.json') as file:
+        json_text = json.load(file)
+    afr_source_dir = os.path.expanduser(json_text['afr_source_dir'])
+    thing_name = json_text['thing_name']
+
+    # Read cert_pem from file
+    cert_pem_filename = thing_name + '_cert_pem_file'
+    try:
+        cert_pem_file = open(cert_pem_filename, 'r')
+    except IOError:
+        print("%s file not found. Run prerequisite step"%cert_pem_filename)
+        sys.exit(1)
+    else:
+        cert_pem = cert_pem_file.read()
+
+    # Read private_key_pem from file
+    private_key_pem_filename = thing_name + '_private_key_pem_file'
+    try:
+        private_key_pem_file = open(private_key_pem_filename, 'r')
+    except IOError:
+        print("%s file not found. Run prerequisite step"%private_key_pem_filename)
+        sys.exit(1)
+    else:
+        private_key_pem = private_key_pem_file.read()
+
+    # Modify 'aws_clientcredential_keys.h' file
+    misc.update_client_credential_keys(
+        afr_source_dir, cert_pem, private_key_pem)
+    print("Completed update operation!")
+
 
 def update_credential_file():
     with open('configure.json') as file:
@@ -177,6 +211,10 @@ def setup():
     prereq()
     update_credential_file()
 
+def kconfigSetup():
+    prereq()
+    update_client_credential_keys_kconfig()
+
 def cleanup():
     delete_prereq()
     cleanup_creds()
@@ -196,12 +234,14 @@ def list_policies():
     policies = client.list_policies()['policies']
     print(policies)
 
+
 if __name__ == "__main__":
 
     arg_parser = argparse.ArgumentParser()
     sub_arg_parser = arg_parser.add_subparsers(help='Available commands',
         dest='command')
     setup_parser = sub_arg_parser.add_parser('setup', help='setup aws iot')
+    kconfig_setup_parser = sub_arg_parser.add_parser('kconfig_setup', help='setup aws iot')
     clean_parser = sub_arg_parser.add_parser('cleanup', help='cleanup aws iot')
     list_cert_parser = sub_arg_parser.add_parser('list_certificates',
         help='list certificates')
@@ -223,6 +263,8 @@ if __name__ == "__main__":
 
     if args.command == 'setup':
         setup()
+    elif args.command == 'kconfig_setup':
+        kconfigSetup()
     elif args.command == 'cleanup':
         cleanup()
     elif args.command == 'list_certificates':

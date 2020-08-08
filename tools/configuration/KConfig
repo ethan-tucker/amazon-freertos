@@ -62,11 +62,13 @@ config IOT_ENDPOINT
     string "AWS IoT endpoint"
     help
         The endpoint associated with your aws account.
+    default "<IOT_ENDPOINT>"
 
 config THING_NAME
     string "AWS Thing name"
     help
         The endpoint associated with your aws account.
+    default "<THING_NAME>"
 
 config THING_CERT
     string "Thing certificate"
@@ -80,7 +82,8 @@ config THING_PRIVATE_KEY
 
 endmenu
 
-menu "Demo Selection"    
+choice "Demo Selection"
+    bool "Demo selection"
     config MQTT_DEMO_ENABLED
         bool "MQTT demo"
         depends on MQTT_ENABLED
@@ -92,4 +95,4 @@ menu "Demo Selection"
     config OTA_DEMO_ENABLED
         bool "OTA update demo"
         depends on OTA_ENABLED
-endmenu
+endchoice

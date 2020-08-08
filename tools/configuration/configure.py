@@ -4,6 +4,7 @@ import kconfiglib
 import re
 import sys
 from collections import OrderedDict
+import boto3
 
 
 def getValidUserInput(options, max_acceptable_value, error_message):
@@ -82,11 +83,39 @@ def formatFunctionDeclarations(config_filepath):
     os.remove(config_filepath)
 
 
+def updateKConfigAWSCredentials(iot_endpoint, thing_name):
+    with open(".config", "r+") as config_file:
+        config_text = config_file.read()
+        config_text = config_text.replace("<THING_NAME>", thing_name)
+        config_text = config_text.replace("<IOT_ENDPOINT>", iot_endpoint)
+        config_file.seek(0)
+        config_file.write(config_text)
+        config_file.truncate()
+
+
+def resetKConfig(thing_created, iot_endpoint, thing_name):
+    updated_file = []
+    with open(".config", "r") as config_file:
+        config_text = config_file.readlines()
+        for line in config_text:
+            if "CONFIG_IOT_ENDPOINT" in line:
+                line = 'CONFIG_IOT_ENDPOINT="<IOT_ENDPOINT>"\n'
+            if "CONFIG_THING_NAME" in line:
+                line = 'CONFIG_THING_NAME="<THING_NAME>"\n'
+            updated_file.append(line)
+    with open(".config", "w") as reset_config_file:
+        for line in updated_file:
+            reset_config_file.write(line)
+
+
 # This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
 # is used by the FreeRTOS source code
-def boardConfiguration():
+def boardConfiguration(thing_created, thing_name, iot_endpoint):
     # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
     # file and the defaults are set by the values in the .config file. 
+    if(thing_created):
+        updateKConfigAWSCredentials(iot_endpoint, thing_name)
+
     print("\n-----Running guiconfig-----\n")
     sys.stdout.flush()
     subprocess.run(["guiconfig"])
@@ -96,6 +125,8 @@ def boardConfiguration():
     print("\n-----Running genconfig-----\n")
     sys.stdout.flush()
     subprocess.run(["genconfig", "--header-path=temp.h"])
+
+    resetKConfig(thing_created, iot_endpoint, thing_name)
 
     print("\n-----Finished configuring-----\n")
 
@@ -109,6 +140,15 @@ def loadCurrentBoardChoice():
         vendor = currentChoice[0]
         board = currentChoice[1]
         return (vendor, board)
+    return None
+
+
+def loadCurrentThingName():
+    # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
+    if(os.path.isfile("thingName.csv")):
+        f = open("thingName.csv", "r")
+        thing_name = f.read()
+        return thing_name
     return None
 
 
@@ -126,6 +166,75 @@ def buildAndFlashBoard():
     subprocess.run(["py", "vendors/espressif/esp-idf/tools/idf.py", "erase_flash", "flash", "monitor", "-p", "COM3", "-B", "build"])
     os.chdir("tools/configuration")
 
+
+def cleanupResources(thing_name):    
+    print("\n-----Cleaning up your AWS resources-----\n")
+    sys.stdout.flush()
+
+    updateConfigJsonFile(thing_name)
+
+    os.chdir("../aws_config_quick_start")
+    subprocess.run(["py", "SetupAWS.py", "delete_prereq"])
+
+    resetConfigJsonFile(thing_name)
+
+    os.chdir("../configuration")
+    print("\n-----Completed clean up-----\n")
+    os.remove("thingName.csv")
+    return thing_name
+
+
+def provisionResources():
+    print("\n----Choose a thing name-----\n")
+    thing_name = input("What would you like to your thing name to be: ")
+    
+    print("\n-----Provisioning your AWS resources-----\n")
+    sys.stdout.flush()
+
+    updateConfigJsonFile(thing_name)
+
+    os.chdir("../aws_config_quick_start")
+    subprocess.run(["py", "SetupAWS.py", "kconfig_setup"])
+
+    resetConfigJsonFile(thing_name)
+
+    os.chdir("../configuration")
+    print("\n-----Completed Provisioning-----\n")
+
+    # write thing choice out to a file so it can persist between runs
+    with open("thingName.csv", "w") as database_file:
+        database_file.write(thing_name)
+
+    return thing_name
+
+
+def updateConfigJsonFile(thing_name):
+    # update configure.json file (this is where the setup script expects the thing_name to be)
+    with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
+        configure_text = configure_json.read()
+        configure_text = configure_text.replace("$thing_name", thing_name)
+        configure_json.seek(0)
+        configure_json.write(configure_text)
+        configure_json.truncate()
+
+
+def resetConfigJsonFile(thing_name):
+    # return the configure.json file to its original state so that the file does not remain changed 
+    # (dont want to change git history)
+    with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
+        configure_text = configure_json.read()
+        configure_text = configure_text.replace(thing_name, "$thing_name")
+        configure_json.seek(0)
+        configure_json.write(configure_text)
+        configure_json.truncate()
+
+
+def getEndpoint():
+    client = boto3.client('iot')
+    endpoint = client.describe_endpoint(endpointType='iot:Data-ATS')
+    return endpoint['endpointAddress']
+
+
 def main():
     # I used an ordered dict here so that it was easy to use/index as well as easy to add new vendor board combos.
     boards_dict = OrderedDict(
@@ -134,7 +243,7 @@ def main():
               ("infineon", ["xmc4800_iotkit","xmc4800_plus_optiga_trust_x"]), 
               ("marvell", ["mw300_rd"]), 
               ("mediatek", ["mt7697hx-dev-kit"]), 
-              ("microchip", ["curiosity_pic32mzef","ecc608a_plus_winsim"]), 
+              ("microchip", ["curiosity_pic32mzef","ecc608a_plus_winsim"]),
               ("nordic", ["nrf52840-dk"]), 
               ("nuvoton", ["numaker_iot_m487_wifi"]), 
               ("nxp", ["lpc54018iotmodule"]), 
@@ -145,35 +254,50 @@ def main():
               ("xilinx", ["microzed"])])
     config_filepath = "temp.h"
     board_chosen = False
+    thing_created = False
+    iot_endpoint = getEndpoint()
 
     # loadCurrentBoardChoice() checks if the user has chosen a board in the past. If they have not chosen a board before the "Configure demo" option 
     # will not be available until they do so
+    
     currentBoardChoice = loadCurrentBoardChoice()
     if(currentBoardChoice):
         board_chosen = True
 
+    thing_name = loadCurrentThingName()
+    if(thing_name):
+        thing_created = True
+
     choice = ""
-    while choice != "4":
+    while choice != "6":
         print("-----FREERTOS Configuration-----\n")
         print("Options:")
-        print("1) Choose a board")
+        print("1) Provision AWS resources")
+        print("2) Choose a board")
         if(board_chosen):
-            print("2) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
-            print("3) Build and flash the demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
-        print("4) Exit")
+            print("3) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
+            print("4) Build and flash the demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
+        if(thing_created):
+            print("5) Cleanup AWS resources for the thing: '%s'"%(thing_name))
+        print("6) Exit")
         choice = input("\nWhat do you want to do?: ")
         
-        if(choice == "1"):
+        if(choice =="1"):
+            thing_name = provisionResources()
+            thing_created = True
+        elif(choice == "2"):
             boardChoiceMenu(boards_dict)
             currentBoardChoice = loadCurrentBoardChoice()
             board_chosen = True
-        elif(choice == "2" and board_chosen):
-            boardConfiguration()
-            formatFunctionDeclarations(config_filepath)
         elif(choice == "3" and board_chosen):
-            #print("\n-----This is when building a flashing would happen-----\n")
+            boardConfiguration(thing_created, thing_name, iot_endpoint)
+            formatFunctionDeclarations(config_filepath)
+        elif(choice == "4" and board_chosen):
             buildAndFlashBoard()
-        elif(choice == "4"):
+        elif(choice == "5" and thing_created):
+            cleanupResources(thing_name)
+            thing_created = False
+        elif(choice == "6"):
             pass
         else:
             print("Please choose a valid option")
