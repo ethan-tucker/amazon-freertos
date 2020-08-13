@@ -8,12 +8,18 @@ import boto3
 import glob
 
 
+# getValidUserInput: Validates that the numbered selected the user makes is:
+#   1) a number
+#   2) within a valid range (based on the number of total options)
+# This is used by both the getBoardChoice function and the getVenderChoice function
 def getValidUserInput(options, max_acceptable_value, error_message):
     user_input = input("\n%s (by number): "%(error_message))
     # This loop will run until the user has entered a valid selection. At that point the function will return the name of the board chosen.
     while 1:
+        # Confirms that the user entered a digit
         if(user_input.isdigit()):
             user_input_int = int(user_input)
+            # Given the user entered a digit, make sure that the number is within an acceptable range
             if(user_input_int < 1 or user_input_int > max_acceptable_value):
                 user_input = input("\n%s (please enter a valid number): "%(error_message))
             else:
@@ -22,6 +28,8 @@ def getValidUserInput(options, max_acceptable_value, error_message):
             user_input = input("\n%s (please enter a number): "%(error_message))
 
 
+# getBoardChoice: Prints all of the possible boards options that the user can select from. It then calls
+# getValidUserInput to makes sure that they made a valid selection.
 def getBoardChoice(boards):
     print("\n-----CHOOSE A BOARD-----\n")
     
@@ -31,6 +39,8 @@ def getBoardChoice(boards):
     return getValidUserInput(boards, len(boards), "Select your board")
 
 
+# getVendorChoice: This function prints all of the possible vendor options that the user can select from. It then calls
+# getValidUserInput to makes sure that they made a valid selection.
 def getVendorChoice(boards_dict):
     print("\n-----CHOOSE A VENDOR-----\n")
 
@@ -42,6 +52,7 @@ def getVendorChoice(boards_dict):
     return getValidUserInput(vendors, len(vendors), "Select your vendor")
 
 
+# boardChoiceMenu: calls getVendorChoice followed by getBoardChoice and echos the user choice to the terminal
 def boardChoiceMenu(boards_dict):
     vendor = getVendorChoice(boards_dict)
     vendor_name = vendor[0]
@@ -69,6 +80,9 @@ def boardChoiceMenu(boards_dict):
         database_file.write(vendor_name + "," + board)
 
 
+# findAllKConfigFiles: Globs the boards directory tree for Kconfig files. Globbing for files matching a pattern allows for 
+# future files to be added without the code needing to be changed. It also doesn't break if certain boards do not have all 
+# of the configuration files (for example some boards wont have ota_agent_config.h).
 def findAllKConfigFiles(vendor, board):
     board_properties = "../../vendors/" + vendor + "/boards/" + board + "/*Kconfig"
     library_configs = "../../vendors/" + vendor + "/boards/" + board + "/aws_demos/config_files/*Kconfig"
@@ -77,7 +91,8 @@ def findAllKConfigFiles(vendor, board):
     return KconfigFilenamesList
 
 
-# This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. The fomatted file is outputted to build/kconfig/kconfig.h
+# formatFunctionDeclarations: This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. 
+# The fomatted file is outputted to build/kconfig/kconfig.h
 def formatFunctionDeclarations(config_filepath):
     with open(config_filepath, "r") as config_file,\
          open("../../build/kconfig/kconfig.h", "w") as outfile:
@@ -93,6 +108,8 @@ def formatFunctionDeclarations(config_filepath):
     os.remove(config_filepath)
 
 
+# updateKConfigAWSCredentials: Updates the ".config" file with the thing name that the user chose and the users AWS endpoint
+# this prevents them from having to enter it in manually.
 def updateKConfigAWSCredentials(iot_endpoint, thing_name):
     with open(".config", "r+") as config_file:
         config_text = config_file.read()
@@ -103,6 +120,7 @@ def updateKConfigAWSCredentials(iot_endpoint, thing_name):
         config_file.truncate()
 
 
+# resetKConfig: Resets the ".config" file with the format that the updateKConfigAWSCredentials expects.
 def resetKConfig(thing_created, iot_endpoint, thing_name):
     updated_file = []
     with open(".config", "r") as config_file:
@@ -118,7 +136,7 @@ def resetKConfig(thing_created, iot_endpoint, thing_name):
             reset_config_file.write(line)
 
 
-# This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
+# boardConfiguration: This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
 # is used by the FreeRTOS source code
 def boardConfiguration(thing_created, thing_name, iot_endpoint):
     # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
@@ -141,7 +159,7 @@ def boardConfiguration(thing_created, thing_name, iot_endpoint):
     print("\n-----Finished configuring-----\n")
 
 
-# This function checks whether or not the user has chosen a board in the past. If they have it returns the vendor and board they previously selected, if not it returns None.
+# loadCurrentBoardChoice: This function checks whether or not the user has chosen a board in the past. If they have it returns the vendor and board they previously selected, if not it returns None.
 def loadCurrentBoardChoice():
     # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("boardChoice.csv")):
@@ -153,6 +171,7 @@ def loadCurrentBoardChoice():
     return None
 
 
+# loadCurrentThingName: Checks whether or not the file "thingName.csv" exists.
 def loadCurrentThingName():
     # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("thingName.csv")):
@@ -162,6 +181,8 @@ def loadCurrentThingName():
     return None
 
 
+# buildAndFlashBoard: Generates the build file for the board, builds the projects, and then flashes the board and runs the demo.
+# These functions are currently hard coded for the esp32 board to be built and run on a windows machine.
 def buildAndFlashBoard():
     # This is currently a proof of concept with hard coded commands
     os.chdir("../..")
@@ -177,6 +198,9 @@ def buildAndFlashBoard():
     os.chdir("tools/configuration")
 
 
+# cleanupResource: runs SetupAWS.py delete_prerqe which cleans up all of the files associated with the AWS resources as 
+# well as cleans up all of the resources that were provisioned to the users AWS account. The SetupAWS Readme.md has more
+# information about the inner workings of this program.
 def cleanupResources(thing_name):    
     print("\n-----Cleaning up your AWS resources-----\n")
     sys.stdout.flush()
@@ -194,6 +218,8 @@ def cleanupResources(thing_name):
     return thing_name
 
 
+# provisionsResources: Runs SetupAWS.py kconfig_setup which is a functionality that I added to support setting up the 
+# resources and modifying the client_credential_keys without modifying the client_credential file. 
 def provisionResources():
     print("\n----Choose a thing name-----\n")
     thing_name = input("What would you like to your thing name to be: ")
@@ -218,8 +244,8 @@ def provisionResources():
     return thing_name
 
 
+# updateConfigJsonFile: Updates configure.json file (this is where the setup script expects the thing_name to be)
 def updateConfigJsonFile(thing_name):
-    # update configure.json file (this is where the setup script expects the thing_name to be)
     with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
         configure_text = configure_json.read()
         configure_text = configure_text.replace("$thing_name", thing_name)
@@ -228,9 +254,9 @@ def updateConfigJsonFile(thing_name):
         configure_json.truncate()
 
 
+# updateConfigJsonFile: Return the configure.json file to its original state so that the file does not remain changed 
+# (dont want to change git history). 
 def resetConfigJsonFile(thing_name):
-    # return the configure.json file to its original state so that the file does not remain changed 
-    # (dont want to change git history)
     with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
         configure_text = configure_json.read()
         configure_text = configure_text.replace(thing_name, "$thing_name")
@@ -239,6 +265,8 @@ def resetConfigJsonFile(thing_name):
         configure_json.truncate()
 
 
+# getEndpoint: Returns the endpoint of the boto3 client connection the user has established. This allows the iot-endpoint
+# to be set in ".config" without the user having to manually enter it.
 def getEndpoint():
     client = boto3.client('iot')
     endpoint = client.describe_endpoint(endpointType='iot:Data-ATS')
