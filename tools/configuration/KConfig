@@ -2,15 +2,21 @@
 menu "Board Properties"
     config OTA_ENABLED
         bool "Ota enabled"
+        default y
 
     config MQTT_ENABLED
         bool "Mqtt enabled"
+        default y
+
 
     config TCP_ENABLED
         bool "Tcp enabled"
+        default y
+
         
     config WIFI_ENABLED
         bool "Wifi enabled"
+        default y
 endmenu
 
 menu "Libary configurations"

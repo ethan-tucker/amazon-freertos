@@ -5,6 +5,7 @@ import re
 import sys
 from collections import OrderedDict
 import boto3
+import glob
 
 
 def getValidUserInput(options, max_acceptable_value, error_message):
@@ -47,10 +48,11 @@ def boardChoiceMenu(boards_dict):
     boards = vendor[1]
     board = getBoardChoice(boards)
     
-    # These are the file paths for the configuration files associated with the vendor and board combo the user chose
-    ota_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/ota_Kconfig"
-    IP_board_config = "../../vendors/" + vendor_name + "/boards/" + board + "/aws_demos/config_files/FreeRTOSIP_Kconfig"
-    board_properties = "../../vendors/" + vendor_name + "/boards/" + board + "/Kconfig"
+    command = ["py","merge_config.py", "KConfig", ".config"]
+
+    config_files = findAllKConfigFiles(vendor_name, board)
+    for file in config_files:
+        command.append(file)
 
     # merg_config.py runs merge config with all of the configruation files associated with the chosen board. This created a heirarchy of defaults in which
     # the values assigned int the board configuration files take precedence over those set in the library files (these are included in the file "KConfig").
@@ -60,11 +62,19 @@ def boardChoiceMenu(boards_dict):
     print("Your choice was the %s %s"%(vendor_name, board))
     print("\n-----MERGING CONFIGURATIONS FOR YOUR BOARD-----\n")
     sys.stdout.flush()
-    subprocess.run(["py","merge_config.py", "KConfig", ".config", ota_board_config, IP_board_config, board_properties])
+    subprocess.run(command)
     print()
     # This is writing the users board choice out to a "database" file. This keeps track of the last board the user has configured in between runs of the program.
     with open("boardChoice.csv", "w") as database_file:
         database_file.write(vendor_name + "," + board)
+
+
+def findAllKConfigFiles(vendor, board):
+    board_properties = "../../vendors/" + vendor + "/boards/" + board + "/*Kconfig"
+    library_configs = "../../vendors/" + vendor + "/boards/" + board + "/aws_demos/config_files/*Kconfig"
+    KconfigFilenamesList = glob.glob(board_properties) + glob.glob(library_configs)
+
+    return KconfigFilenamesList
 
 
 # This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. The fomatted file is outputted to build/kconfig/kconfig.h
@@ -270,7 +280,7 @@ def main():
 
     choice = ""
     while choice != "6":
-        print("-----FREERTOS Configuration-----\n")
+        print("\n-----FREERTOS Configuration-----\n")
         print("Options:")
         print("1) Provision AWS resources")
         print("2) Choose a board")
