@@ -110,18 +110,20 @@ def formatFunctionDeclarations(config_filepath):
 
 # updateKConfigAWSCredentials: Updates the ".config" file with the thing name that the user chose and the users AWS endpoint
 # this prevents them from having to enter it in manually.
-def updateKConfigAWSCredentials(iot_endpoint, thing_name):
+def updateKConfigAWSCredentials(iot_endpoint, thing_name, thing_cert, thing_private_key):
     with open(".config", "r+") as config_file:
         config_text = config_file.read()
         config_text = config_text.replace("<THING_NAME>", thing_name)
         config_text = config_text.replace("<IOT_ENDPOINT>", iot_endpoint)
+        config_text = config_text.replace("<THING_CERT>", thing_cert)
+        config_text = config_text.replace("<THING_PRIVATE_KEY>", thing_private_key)
         config_file.seek(0)
         config_file.write(config_text)
         config_file.truncate()
 
 
 # resetKConfig: Resets the ".config" file with the format that the updateKConfigAWSCredentials expects.
-def resetKConfig(thing_created, iot_endpoint, thing_name):
+def resetKConfig():
     updated_file = []
     with open(".config", "r") as config_file:
         config_text = config_file.readlines()
@@ -130,6 +132,10 @@ def resetKConfig(thing_created, iot_endpoint, thing_name):
                 line = 'CONFIG_IOT_ENDPOINT="<IOT_ENDPOINT>"\n'
             if "CONFIG_THING_NAME" in line:
                 line = 'CONFIG_THING_NAME="<THING_NAME>"\n'
+            if "CONFIG_THING_CERT" in line:
+                line = 'CONFIG_THING_CERT="<THING_CERT>"\n'
+            if "CONFIG_THING_PRIVATE_KEY" in line:
+                line = 'CONFIG_THING_PRIVATE_KEY="<THING_PRIVATE_KEY>"\n'
             updated_file.append(line)
     with open(".config", "w") as reset_config_file:
         for line in updated_file:
@@ -138,11 +144,11 @@ def resetKConfig(thing_created, iot_endpoint, thing_name):
 
 # boardConfiguration: This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
 # is used by the FreeRTOS source code
-def boardConfiguration(thing_created, thing_name, iot_endpoint):
+def boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key):
     # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
     # file and the defaults are set by the values in the .config file. 
     if(thing_created):
-        updateKConfigAWSCredentials(iot_endpoint, thing_name)
+        updateKConfigAWSCredentials(iot_endpoint, thing_name, thing_cert, thing_private_key)
 
     print("\n-----Running guiconfig-----\n")
     sys.stdout.flush()
@@ -154,7 +160,7 @@ def boardConfiguration(thing_created, thing_name, iot_endpoint):
     sys.stdout.flush()
     subprocess.run(["genconfig", "--header-path=temp.h"])
 
-    resetKConfig(thing_created, iot_endpoint, thing_name)
+    resetKConfig()
 
     print("\n-----Finished configuring-----\n")
 
@@ -273,6 +279,23 @@ def getEndpoint():
     return endpoint['endpointAddress']
 
 
+def updateFormat(file_name):
+    lines = file_name.readlines()
+    res_text = ""
+    for idx, line in enumerate(lines):
+        if (idx != 0 and idx != len(lines)-1):
+            res_text += line.strip()
+    print(res_text)
+    return res_text
+
+
+def formatCredentials(thing_name):
+    with open("../aws_config_quick_start/" + thing_name + "_cert_pem_file") as cert_pem_file,\
+        open("../aws_config_quick_start/" + thing_name + "_private_key_pem_file") as private_key_pem_file:
+
+        return (updateFormat(cert_pem_file), updateFormat(private_key_pem_file))
+
+
 def main():
     # I used an ordered dict here so that it was easy to use/index as well as easy to add new vendor board combos.
     boards_dict = OrderedDict(
@@ -322,13 +345,16 @@ def main():
         
         if(choice =="1"):
             thing_name = provisionResources()
+            credential_keys = formatCredentials(thing_name)
+            thing_cert = credential_keys[0]
+            thing_private_key = credential_keys[1]
             thing_created = True
         elif(choice == "2"):
             boardChoiceMenu(boards_dict)
             currentBoardChoice = loadCurrentBoardChoice()
             board_chosen = True
         elif(choice == "3" and board_chosen):
-            boardConfiguration(thing_created, thing_name, iot_endpoint)
+            boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key)
             formatFunctionDeclarations(config_filepath)
         elif(choice == "4" and board_chosen):
             buildAndFlashBoard()

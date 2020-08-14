@@ -1,5 +1,5 @@
 /*
- * FreeRTOS V202002.00
+ * FreeRTOS V201906.00 Major
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,20 +26,36 @@
 #ifndef AWS_CLIENT_CREDENTIAL_KEYS_H
 #define AWS_CLIENT_CREDENTIAL_KEYS_H
 
-#include <stdint.h>
-#include "kconfig.h"
 /*
- * PEM-encoded client certificate.
+ * PEM-encoded client certificate
  *
  * Must include the PEM header and footer:
  * "-----BEGIN CERTIFICATE-----\n"\
  * "...base64 data...\n"\
- * "-----END CERTIFICATE-----"
+ * "-----END CERTIFICATE-----\n"
  */
 #define keyCLIENT_CERTIFICATE_PEM \
 "-----BEGIN CERTIFICATE-----\n"\
 CONFIG_THING_CERT\
-"\n-----END CERTIFICATE-----"
+"-----END CERTIFICATE-----\n"
+
+/*
+ * PEM-encoded issuer certificate for AWS IoT Just In Time Registration (JITR).
+ * This is required if you're using JITR, since the issuer (Certificate 
+ * Authority) of the client certificate is used by the server for routing the 
+ * device's initial request. (The device client certificate must always be 
+ * sent as well.) For more information about JITR, see:
+ *  https://docs.aws.amazon.com/iot/latest/developerguide/jit-provisioning.html, 
+ *  https://aws.amazon.com/blogs/iot/just-in-time-registration-of-device-certificates-on-aws-iot/.
+ *
+ * If you're not using JITR, set below to NULL.
+ * 
+ * Must include the PEM header and footer:
+ * "-----BEGIN CERTIFICATE-----\n"\
+ * "...base64 data...\n"\
+ * "-----END CERTIFICATE-----\n"
+ */
+#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM  NULL
 
 /*
  * PEM-encoded client private key.
@@ -47,22 +63,12 @@ CONFIG_THING_CERT\
  * Must include the PEM header and footer:
  * "-----BEGIN RSA PRIVATE KEY-----\n"\
  * "...base64 data...\n"\
- * "-----END RSA PRIVATE KEY-----"
+ * "-----END RSA PRIVATE KEY-----\n"
  */
 #define keyCLIENT_PRIVATE_KEY_PEM \
 "-----BEGIN RSA PRIVATE KEY-----\n"\
 CONFIG_THING_PRIVATE_KEY\
-"\n-----END RSA PRIVATE KEY-----"
-
-/*
- * PEM-encoded Just-in-Time Registration (JITR) certificate (optional).
- *
- * If used, must include the PEM header and footer:
- * "-----BEGIN CERTIFICATE-----\n"\
- * "...base64 data...\n"\
- * "-----END CERTIFICATE-----"
- */
-#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM  ""
+"-----END RSA PRIVATE KEY-----\n"
 
 
 #endif /* AWS_CLIENT_CREDENTIAL_KEYS_H */

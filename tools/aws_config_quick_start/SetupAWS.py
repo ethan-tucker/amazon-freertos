@@ -113,9 +113,9 @@ def update_client_credential_keys_kconfig():
         private_key_pem = private_key_pem_file.read()
 
     # Modify 'aws_clientcredential_keys.h' file
-    misc.update_client_credential_keys(
-        afr_source_dir, cert_pem, private_key_pem)
-    print("Completed update operation!")
+    # misc.update_client_credential_keys(
+    #     afr_source_dir, cert_pem, private_key_pem)
+    # print("Completed update operation!")
 
 
 def update_credential_file():

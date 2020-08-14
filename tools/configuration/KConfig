@@ -80,11 +80,13 @@ config THING_CERT
     string "Thing certificate"
     help
         The certificate associated with your registered thing.
+    default "<THING_CERT>"
 
 config THING_PRIVATE_KEY
     string "Thing private key"
     help
         The private key associated with your registered thing.
+    default "<THING_PRIVATE_KEY>"
 
 endmenu
 
