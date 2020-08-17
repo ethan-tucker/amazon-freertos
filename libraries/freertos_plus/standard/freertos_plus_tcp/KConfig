@@ -2,7 +2,7 @@ if TCP_ENABLED
     menu "TCP library configuration options"
 
         menu "Constants affecting the TCP/IP task execution behavior"
-            config IP_TASK_PRIORITY
+            config IP_TASK_PRIORITY_DIFFERENCE
                 int "IP task priority"
                 help
                     The priority is a standard FreeRTOS task priority. 
@@ -10,8 +10,10 @@ if TCP_ENABLED
                     The larger the user entered value the lower the priority.
 
 
-            config IP_TASK_STACK_SIZE_WORDS
+            config IP_TASK_STACK_SIZE_WORDS_MULTIPLIER
                 int "IP Task size words"
+                help
+                    The task stack size in words is (configMINIMAL_STACK_SIZE * <user entered value>).
 
             config IP_USE_NETWORK_EVENT_HOOK
                 bool "Use network event hook"
@@ -39,7 +41,7 @@ if TCP_ENABLED
 
             config IP_TCP_MAY_LOG_PORT_FUNC
                 string "TCP may log port"
-                default "#define TCP_MAY_LOG_PORT(xPort) ( ( xPort ) != 23U )"
+                default "TCP_MAY_LOG_PORT(xPort) ( ( xPort ) != 23U )"
 
             config IP_CHECK_IP_QUEUE_SPACE
                 bool "Check IP queue space"
@@ -74,6 +76,10 @@ if TCP_ENABLED
                 bool "Ethernet driver filters frame types"
                 default n
 
+            config IP_WINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY
+                int "Windows/Mac interrupt simulator delay"
+                default 20
+
             config IP_ETHERNET_DRIVER_FILTERS_PACKETS
                 bool "Ethernt driver filters packets"
                 default n
@@ -98,6 +104,11 @@ if TCP_ENABLED
             config IP_ZERO_COPY_TX_DRIVERS
                 bool "Zero copy TX drivers"
                 default 0
+
+            config IP_ZERO_COPY_RX_DRIVERS
+                bool "Zero copy RX drivers"
+                default 0
+                
 
             config IP_BUFFER_PADDING
                 int "Buffer padding"
@@ -203,6 +214,12 @@ if TCP_ENABLED
                 bool "Socket has user semaphore"
                 default n
 
+            config IP_SOCKET_HAS_USER_WAKE_CALLBACK
+                bool "Socket has user wake callback"
+
+            config IP_USE_CALLBACKS
+                bool "Use Callbacks"
+
             config IP_SUPPORT_SINGALS
                 bool "Support signals"
                 default n
@@ -265,8 +282,10 @@ if TCP_ENABLED
 
             if IP_USE_DNS_CACHE
                 config IP_DNS_CACHE_ENTRIES
-                    bool "DNS cache entries"
-                    default y
+                    int "DNS cache entries"
+
+                config IP_DNS_CACHE_ADDRESSES_PER_ENTRY
+                    int "DNS cache addresses per entry"
 
                 config IP_DNS_CACHE_NAME_LENGTH
                     int "DNS cache name length"
@@ -289,6 +308,10 @@ if TCP_ENABLED
             config IP_USE_DHCP_HOOK
                 bool "Use DHCP hook"
                 default n
+
+            config IP_DHCP_USES_UNICAST
+                bool "DHCP uses unicast"
+                default y
 
             config IP_DHCP_REGISTER_HOSTNAME
                 bool "DHCP register hostname"
