@@ -1,32 +1,73 @@
 if MQTT_ENABLED
 
     menu "MQTT library configuration options"
-    config MQTT_LIBRARY_LOG_NAME
-        string "Library log name"
+    config MQTT_ENABLE_METRICS
+        bool "Enable metrics"
+        default y
 
-    choice MQTT_LIBRARY_LOG_LEVEL
-        bool "Library log level"
+    config MQTT_KEEP_ALIVE_INTERVAL_SECONDS
+        int "Keep alive interval"
+        default 1200
 
-        config MQTT_LOG_NONE
-            bool "LOG_NONE"
+    config MQTT_KEEP_ALIVE_ACTUAL_INTERVAL_TICKS
+        int "Keep alive actual interval ticks"
+        default 5000
 
-        config MQTT_LOG_ERROR
-            bool "LOG_ERROR"
+    config MQTT_KEEP_ALIVE_TIMEOUT_TICKS 
+        int "Keep alive timeout ticks"
+        default 1000
 
-        config MQTT_LOG_WARN
-            bool "LOG_WARN"
+    config MQTT_TASK_MAX_BLOCK_TICKS
+        int "Task max block ticks"
 
-        config MQTT_LOG_INFO
-            bool "LOG_INFO"
+    config MQTT_TASK_STACK_DEPTH_DEPENDS_ON_STACK_SIZE
+        bool "Task stack depth depends on minimal stack size"
+        default y
 
-        config MQTT_LOG_DEBUG
-            bool "LOG_DEBUG"
-    endchoice
+    config MQTT_TASK_STACK_DEPTH_MULTIPLIER
+        int "Task stack depth multiplier"
+        default 4
+        depends on MQTT_TASK_STACK_DEPTH_DEPENDS_ON_STACK_SIZE
 
-    config MQTT_STATE_ARRAY_MAX_COUNT
-        int "MQTT state array max count"
+    config MQTT_TASK_STACK_DEPTH
+        int "Task stack depth"
+        depends on !MQTT_TASK_STACK_DEPTH_DEPENDS_ON_STACK_SIZE
 
-    config MQTT_MAX_QUEUED_PUBLISH_MESSAGES
-        int "MQTT max queued publish messages"
+    config MQTT_TASK_PRIORITY_DEPENDS_ON_MAX_PRIORITY
+        bool "Task priority depends on the max task priority"
+        default y
+        help
+            False means that task priority depends on the min task priority
+
+    config MQTT_TASK_PRIORITY_DIFFERENCE
+        int "Difference between max priority and task priority"
+        default 4
+        depends on MQTT_TASK_PRIORITY_DEPENDS_ON_MAX_PRIORITY
+        help
+            Task Priority = MAX_PRIORITY - <ENTERED_VALUE>
+
+    config MQTT_TASK_PRIORITY 
+        int "Task Priority"
+        default 0
+        depends on !MQTT_TASK_PRIORITY_DEPENDS_ON_MAX_PRIORITY
+        help
+            Task Priority = idle_Priority + <ENTERED_VALUE>
+
+    config MQTT_MAX_BROKERS 
+        int "Max brokers"
+        default 1
+
+    config MQTT_MAX_PARALLEL_OPS
+        int "Max parallel ops"
+        default 5
+
+    config MQTT_TCP_SEND_TIMEOUT_MS
+        int "TCP send timeout ms"
+        default 2000
+
+    config MQTT_RX_BUFFER_SIZE
+        int "RX buffer size"
+        default 1024
+
     endmenu
 endif

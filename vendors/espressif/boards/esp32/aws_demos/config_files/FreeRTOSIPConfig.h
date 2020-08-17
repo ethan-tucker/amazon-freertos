@@ -59,7 +59,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1
  * then FreeRTOS_printf should be set to the function used to print out the
  * messages. */
- #if defined( CONFIG_IP_HAS_PRINTF )
+#if defined( CONFIG_IP_HAS_PRINTF )
     #define ipconfigHAS_PRINTF                1
 #else
     #define ipconfigHAS_PRINTF                0
