@@ -98,7 +98,7 @@ def findAllKConfigFiles(vendor, board):
 
 # formatFunctionDeclarations: This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. 
 # The fomatted file is outputted to build/kconfig/kconfig.h
-def formatFunctionDeclarations(config_filepath):
+def formatFunctionDeclarations(temp_config_filepath):
     with open(temp_config_filepath, "r") as config_file,\
          open("../../build/kconfig/kconfig.h", "w") as outfile:
         for line in config_file.readlines():
@@ -398,7 +398,8 @@ def main():
 
         # Choose configuration options
         elif(choice == "3" and board_chosen):
-            boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key)
+            boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert,\
+                               thing_private_key, temp_config_filepath)
             formatFunctionDeclarations(temp_config_filepath)
 
         # Build and flash the demo
