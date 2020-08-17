@@ -12,6 +12,7 @@ import glob
 #   1) a number
 #   2) within a valid range (based on the number of total options)
 # This is used by both the getBoardChoice function and the getVenderChoice function
+# retuns: the valid choice that the user made
 def getValidUserInput(options, max_acceptable_value, error_message):
     user_input = input("\n%s (by number): "%(error_message))
     # This loop will run until the user has entered a valid selection. At that point the function will return the name of the board chosen.
@@ -30,6 +31,7 @@ def getValidUserInput(options, max_acceptable_value, error_message):
 
 # getBoardChoice: Prints all of the possible boards options that the user can select from. It then calls
 # getValidUserInput to makes sure that they made a valid selection.
+# Returns: The board choice (name of the board) that the user chose
 def getBoardChoice(boards):
     print("\n-----CHOOSE A BOARD-----\n")
     
@@ -41,6 +43,7 @@ def getBoardChoice(boards):
 
 # getVendorChoice: This function prints all of the possible vendor options that the user can select from. It then calls
 # getValidUserInput to makes sure that they made a valid selection.
+# Returns: The vendor choice (name of the vendor) that the user chose
 def getVendorChoice(boards_dict):
     print("\n-----CHOOSE A VENDOR-----\n")
 
@@ -53,6 +56,7 @@ def getVendorChoice(boards_dict):
 
 
 # boardChoiceMenu: calls getVendorChoice followed by getBoardChoice and echos the user choice to the terminal
+# Returns: the vendor and board choice that the user made
 def boardChoiceMenu(boards_dict):
     vendor = getVendorChoice(boards_dict)
     vendor_name = vendor[0]
@@ -83,6 +87,7 @@ def boardChoiceMenu(boards_dict):
 # findAllKConfigFiles: Globs the boards directory tree for Kconfig files. Globbing for files matching a pattern allows for 
 # future files to be added without the code needing to be changed. It also doesn't break if certain boards do not have all 
 # of the configuration files (for example some boards wont have ota_agent_config.h).
+# Returns: A list of all Kconfig files associated with a specific board
 def findAllKConfigFiles(vendor, board):
     board_properties = "../../vendors/" + vendor + "/boards/" + board + "/*Kconfig"
     library_configs = "../../vendors/" + vendor + "/boards/" + board + "/aws_demos/config_files/*Kconfig"
@@ -94,7 +99,7 @@ def findAllKConfigFiles(vendor, board):
 # formatFunctionDeclarations: This function takes in the temp.h temporary header file and formats all of the varials with the FUNC tag. 
 # The fomatted file is outputted to build/kconfig/kconfig.h
 def formatFunctionDeclarations(config_filepath):
-    with open(config_filepath, "r") as config_file,\
+    with open(temp_config_filepath, "r") as config_file,\
          open("../../build/kconfig/kconfig.h", "w") as outfile:
         for line in config_file.readlines():
             
@@ -105,7 +110,7 @@ def formatFunctionDeclarations(config_filepath):
             outfile.write(line)
 
     # removes the temporary partially formatted header (it was only needed for this intermediary step)
-    os.remove(config_filepath)
+    os.remove(temp_config_filepath)
 
 
 # updateKConfigAWSCredentials: Updates the ".config" file with the thing name that the user chose and the users AWS endpoint
@@ -144,40 +149,42 @@ def resetKConfig():
 
 # boardConfiguration: This function runs the kconfiglib commands guiconfig and genconfig. This runs the gui to allow the user to make configuration options and then generates the header file that
 # is used by the FreeRTOS source code
-def boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key):
-    # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration opttions for the user to choose. The options are decided by the Kconfig
-    # file and the defaults are set by the values in the .config file. 
+def boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key, temp_config_filepath):
+    # If the user has created a thing using the option in this configure tool then their choices should be prepopulated in the configuration menu.
+    # updateKConfigAWSCredentials will take these pieces of information and fill them in for the user.
     if(thing_created):
         updateKConfigAWSCredentials(iot_endpoint, thing_name, thing_cert, thing_private_key)
 
+    # Running guiconfig uses the base Kconfig and .config file to populate a gui with configuration options for the user to choose. The options are decided by the Kconfig
+    # file and the defaults are set by the values in the .config file. 
     print("\n-----Running guiconfig-----\n")
     sys.stdout.flush()
     subprocess.run(["guiconfig"])
 
     # The header file created by genconfig will be put in the file temp.h. It is almost fully formatted,
-    # but still treats macro functions as strings. The fully formatted header will be located in kconfig.h
+    # but still treats macro functions as strings. The fully formatted header will be located in kconfig.h and will be generated by the formatFunctionDeclarations() function
     print("\n-----Running genconfig-----\n")
     sys.stdout.flush()
-    subprocess.run(["genconfig", "--header-path=temp.h"])
+    subprocess.run(["genconfig", "--header-path=" + temp_config_filepath])
 
     resetKConfig()
 
     print("\n-----Finished configuring-----\n")
 
 
-# loadCurrentBoardChoice: This function checks whether or not the user has chosen a board in the past. If they have it returns the vendor and board they previously selected, if not it returns None.
+# loadCurrentBoardChoice: This function checks whether or not the user has chosen a board in the past and returns their choice if they have made one before.
+# Return: If they have chose a board before, it returns the vendor and board they previously selected, if not it returns None.
 def loadCurrentBoardChoice():
     # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("boardChoice.csv")):
         f = open("boardChoice.csv", "r")
-        currentChoice = f.read().split(",")
-        vendor = currentChoice[0]
-        board = currentChoice[1]
-        return (vendor, board)
+        vendor_and_board = f.read().split(",")
+        return vendor_and_board
     return None
 
 
-# loadCurrentThingName: Checks whether or not the file "thingName.csv" exists.
+# loadCurrentThingName: Checks whether or not the file "thingName.csv" exists and returns their choice if they have made one before. 
+# Returns: If the user has created a thing in the past this will return the name of the thing that they most recently created, if they have not it will return None.
 def loadCurrentThingName():
     # os.path.isfile checks if a file exists. This first line is checking if a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("thingName.csv")):
@@ -191,13 +198,20 @@ def loadCurrentThingName():
 # These functions are currently hard coded for the esp32 board to be built and run on a windows machine.
 def buildAndFlashBoard():
     # This is currently a proof of concept with hard coded commands
+    # First the directory must be changed to the root directory
     os.chdir("../..")
+
+    # Generating the build files
     print("\n-----GENERATING BUILD FILES-----\n")
     sys.stdout.flush()
     subprocess.run(["cmake", "-D","VENDOR=espressif", "-D","BOARD=esp32_wrover_kit", "-D","COMPILER=xtensa-esp32", "-G","Ninja", "-S",".", "-B","build"])
+    
+    # Building the project
     print("\n-----BUILDING PROJECT-----\n")
     sys.stdout.flush()
     subprocess.run(["cmake", "--build","build"])
+    
+    # Flashing the board and running the demo
     print("\n-----FLASHING THE BOARD AND RUNNING THE DEMO-----\n")
     sys.stdout.flush()
     subprocess.run(["py", "vendors/espressif/esp-idf/tools/idf.py", "erase_flash", "flash", "monitor", "-p", "COM3", "-B", "build"])
@@ -221,7 +235,6 @@ def cleanupResources(thing_name):
     os.chdir("../configuration")
     print("\n-----Completed clean up-----\n")
     os.remove("thingName.csv")
-    return thing_name
 
 
 # provisionsResources: Runs SetupAWS.py kconfig_setup which is a functionality that I added to support setting up the 
@@ -233,8 +246,11 @@ def provisionResources():
     print("\n-----Provisioning your AWS resources-----\n")
     sys.stdout.flush()
 
+    # Update the configuration file that the SetupAWS.py script relies on
     updateConfigJsonFile(thing_name)
 
+    # Call the SetupAWS.py script with the "kconfig_setup" command line argument. This will create the thing and generate
+    # the credential files, but will not attempt to update the 
     os.chdir("../aws_config_quick_start")
     subprocess.run(["py", "SetupAWS.py", "kconfig_setup"])
 
@@ -250,10 +266,14 @@ def provisionResources():
     return thing_name
 
 
-# updateConfigJsonFile: Updates configure.json file (this is where the setup script expects the thing_name to be)
+# updateConfigJsonFile: Updates configure.json file (this is where the setup script expects the thing_name to be). 
+# This file is located in "../aws_config_quick_start/configure.json"
 def updateConfigJsonFile(thing_name):
+    # Open with r+ to read and modify at the same time. 
     with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
         configure_text = configure_json.read()
+
+        # The "$thing_name" place holder is replaced with the thing name the user entered
         configure_text = configure_text.replace("$thing_name", thing_name)
         configure_json.seek(0)
         configure_json.write(configure_text)
@@ -262,9 +282,13 @@ def updateConfigJsonFile(thing_name):
 
 # updateConfigJsonFile: Return the configure.json file to its original state so that the file does not remain changed 
 # (dont want to change git history). 
+# This file is located in "../aws_config_quick_start/configure.json"
 def resetConfigJsonFile(thing_name):
+    # Open with r+ to read and modify at the same time. Here the thing_name place holder is replaced with the thing name the user entered
     with open("../aws_config_quick_start/configure.json", "r+") as configure_json:
         configure_text = configure_json.read()
+
+        # The thing name the user entered is replaced with the "$thing_name" placeholder so that the file is not changed from its original state.
         configure_text = configure_text.replace(thing_name, "$thing_name")
         configure_json.seek(0)
         configure_json.write(configure_text)
@@ -273,27 +297,48 @@ def resetConfigJsonFile(thing_name):
 
 # getEndpoint: Returns the endpoint of the boto3 client connection the user has established. This allows the iot-endpoint
 # to be set in ".config" without the user having to manually enter it.
+# Returns: The endpoint of the boto3 client connection the user has established
 def getEndpoint():
     client = boto3.client('iot')
     endpoint = client.describe_endpoint(endpointType='iot:Data-ATS')
     return endpoint['endpointAddress']
 
 
+# updateFormat: The update format function is a helper function used by formatCredentials. It takes in the client credential key files and reformats
+# them to be a string on a single line so that they can be stored in a simple string variable. 
+# Returns: The contents of the file between the second and second to last line, concatenated into one string variable
 def updateFormat(file_name):
     lines = file_name.readlines()
     res_text = ""
     for idx, line in enumerate(lines):
+        # The first and last lines of the file are headers and do not need to be included
         if (idx != 0 and idx != len(lines)-1):
             res_text += line.strip()
-    print(res_text)
     return res_text
 
 
+# formatCredentials: The client credential keys are typically stored in a way that is not easily represented in kconfig. This function takes that format and
+# converts it so that these values can be stored in a simple string.
+# Returns: The two formatted credential keys in a touple
 def formatCredentials(thing_name):
     with open("../aws_config_quick_start/" + thing_name + "_cert_pem_file") as cert_pem_file,\
         open("../aws_config_quick_start/" + thing_name + "_private_key_pem_file") as private_key_pem_file:
 
         return (updateFormat(cert_pem_file), updateFormat(private_key_pem_file))
+
+
+# printMainMenuOptions: Simply prints the options for the main menu. Abstracted to make the main code more readable
+def printMainMenuOptions(board_chosen, currentBoardChoice, thing_created, thing_name):
+        print("\n-----FREERTOS Configuration-----\n")
+        print("Options:")
+        print("1) Provision AWS resources")
+        print("2) Choose a board")
+        if(board_chosen):
+            print("3) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
+            print("4) Build and flash the demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
+        if(thing_created):
+            print("5) Cleanup AWS resources for the thing: '%s'"%(thing_name))
+        print("6) Exit")
 
 
 def main():
@@ -313,54 +358,59 @@ def main():
               ("st", ["stm32l475_discovery"]), 
               ("ti", ["cc3220_launchpad"]), 
               ("xilinx", ["microzed"])])
-    config_filepath = "temp.h"
+    temp_config_filepath = "temp.h"
     board_chosen = False
     thing_created = False
+    thing_cert = ""
+    thing_private_key = ""
     iot_endpoint = getEndpoint()
 
     # loadCurrentBoardChoice() checks if the user has chosen a board in the past. If they have not chosen a board before the "Configure demo" option 
     # will not be available until they do so
-    
     currentBoardChoice = loadCurrentBoardChoice()
     if(currentBoardChoice):
         board_chosen = True
 
+    # loadCurrentThingName() checks if the user has created a thing (using option 1 "provision AWS resources") before. If they have not done this 
+    # before than the option "Cleanup AWS resources" will not be available
     thing_name = loadCurrentThingName()
     if(thing_name):
         thing_created = True
 
     choice = ""
     while choice != "6":
-        print("\n-----FREERTOS Configuration-----\n")
-        print("Options:")
-        print("1) Provision AWS resources")
-        print("2) Choose a board")
-        if(board_chosen):
-            print("3) Configure your demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
-            print("4) Build and flash the demo for the %s %s"% (currentBoardChoice[0],currentBoardChoice[1]))
-        if(thing_created):
-            print("5) Cleanup AWS resources for the thing: '%s'"%(thing_name))
-        print("6) Exit")
+        printMainMenuOptions(board_chosen, currentBoardChoice, thing_created, thing_name)
         choice = input("\nWhat do you want to do?: ")
         
+        # Provision AWS resources 
         if(choice =="1"):
             thing_name = provisionResources()
             credential_keys = formatCredentials(thing_name)
             thing_cert = credential_keys[0]
             thing_private_key = credential_keys[1]
             thing_created = True
+
+        # Choose a board
         elif(choice == "2"):
             boardChoiceMenu(boards_dict)
             currentBoardChoice = loadCurrentBoardChoice()
             board_chosen = True
+
+        # Choose configuration options
         elif(choice == "3" and board_chosen):
             boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert, thing_private_key)
-            formatFunctionDeclarations(config_filepath)
+            formatFunctionDeclarations(temp_config_filepath)
+
+        # Build and flash the demo
         elif(choice == "4" and board_chosen):
             buildAndFlashBoard()
+
+        # Cleanup the AWS resources
         elif(choice == "5" and thing_created):
             cleanupResources(thing_name)
             thing_created = False
+
+        # Quit the program
         elif(choice == "6"):
             pass
         else:
