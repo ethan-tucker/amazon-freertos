@@ -2,7 +2,7 @@ if TCP_ENABLED
     menu "TCP library configuration options"
 
         menu "Constants affecting the TCP/IP task execution behavior"
-            config IP_TASK_PRIORITY_DIFFERENCE
+            config IP_TASK_PRIORITY
                 int "IP task priority"
                 help
                     The priority is a standard FreeRTOS task priority. 
@@ -10,7 +10,7 @@ if TCP_ENABLED
                     The larger the user entered value the lower the priority.
 
 
-            config IP_TASK_STACK_SIZE_WORDS_MULTIPLIER
+            config IP_TASK_STACK_SIZE_WORDS
                 int "IP Task size words"
                 help
                     The task stack size in words is (configMINIMAL_STACK_SIZE * <user entered value>).
