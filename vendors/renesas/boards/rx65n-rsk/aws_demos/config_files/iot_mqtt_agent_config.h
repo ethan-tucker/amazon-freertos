@@ -10,7 +10,8 @@
  * subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * copies or substantial portions of the Software. If you wish to use our Amazon
+ * FreeRTOS name, please do so in a fair use way that does not cause confusion.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
@@ -32,7 +33,8 @@
 #define _AWS_MQTT_AGENT_CONFIG_H_
 
 #include "FreeRTOS.h"
-
+#include "task.h"
+#include "kconfig.h"
 /**
  * @brief Controls whether or not to report usage metrics to the
  * AWS IoT broker.
@@ -41,7 +43,11 @@
  * metric information will be included in the "username" field of
  * the MQTT connect messages.
  */
-#define mqttconfigENABLE_METRICS    ( 1 )
+#if defined( CONFIG_MQTT_ENABLE_METRICS )
+    #define mqttconfigENABLE_METRICS                1
+#else
+    #define mqttconfigENABLE_METRICS                0
+#endif
 
 /**
  * @brief The maximum time an application task waits for sending a command to the
@@ -63,7 +69,7 @@
  * @brief The maximum time interval in seconds allowed to elapse between 2 consecutive
  * control packets.
  */
-#define mqttconfigKEEP_ALIVE_INTERVAL_SECONDS         ( 100 )
+#define mqttconfigKEEP_ALIVE_INTERVAL_SECONDS         ( CONFIG_MQTT_KEEP_ALIVE_INTERVAL_SECONDS )
 
 /**
  * @brief Defines the frequency at which the client should send Keep Alive messages.
@@ -75,7 +81,7 @@
  * This macro defines the interval of inactivity after which a keep alive messages
  * is sent.
  */
-#define mqttconfigKEEP_ALIVE_ACTUAL_INTERVAL_TICKS    ( pdMS_TO_TICKS( 300000 ) )
+#define mqttconfigKEEP_ALIVE_ACTUAL_INTERVAL_TICKS    ( pdMS_TO_TICKS(CONFIG_MQTT_KEEP_ALIVE_ACTUAL_INTERVAL_TICKS) )
 
 /**
  * @brief The maximum interval in ticks to wait for PINGRESP.
@@ -83,42 +89,57 @@
  * If PINGRESP is not received within this much time after sending PINGREQ,
  * the client assumes that the PINGREQ timed out.
  */
-#define mqttconfigKEEP_ALIVE_TIMEOUT_TICKS            ( 1000 )
+#define mqttconfigKEEP_ALIVE_TIMEOUT_TICKS            ( CONFIG_MQTT_KEEP_ALIVE_TIMEOUT_TICKS )
+
+/**
+ * @brief The maximum time in ticks for which the MQTT task is permitted to block.
+ *
+ * The MQTT task blocks until the user initiates any action or until it receives
+ * any data from the broker. This macro controls the maximum time the MQTT task can
+ * block. It should be set to a low number for the platforms which do not have any
+ * mechanism to wake up the MQTT task whenever data is received on a connected socket.
+ * This ensures that the MQTT task keeps waking up frequently and processes the
+ * publish messages received from the broker, if any.
+ */
+#define mqttconfigMQTT_TASK_MAX_BLOCK_TICKS           ( CONFIG_MQTT_TASK_MAX_BLOCK_TICKS )
 
 /**
  * @defgroup MQTTTask MQTT task configuration parameters.
  */
 /** @{ */
-//#define mqttconfigMQTT_TASK_STACK_DEPTH    ( configMINIMAL_STACK_SIZE * 4 )
-#define mqttconfigMQTT_TASK_STACK_DEPTH    ( 2048 )
-#define mqttconfigMQTT_TASK_PRIORITY       ( configMAX_PRIORITIES - 3 )
+
+#if defined( CONFIG_MQTT_TASK_STACK_DEPTH_DEPENDS_ON_STACK_SIZE )
+    #define mqttconfigMQTT_TASK_STACK_DEPTH    ( configMINIMAL_STACK_SIZE * CONFIG_MQTT_TASK_STACK_DEPTH_MULTIPLIER )
+#else
+    #define mqttconfigMQTT_TASK_STACK_DEPTH ( CONFIG_MQTT_TASK_STACK_DEPTH )
+#endif
+
+#if defined( CONFIG_MQTT_TASK_PRIORITY_DEPENDS_ON_MAX_PRIORITY )
+    #define mqttconfigMQTT_TASK_PRIORITY    ( configMAX_PRIORITIES - CONFIG_MQTT_TASK_PRIORITY_DIFFERENCE )
+#else
+    #define mqttconfigMQTT_TASK_PRIORITY ( tskIDLE_PRIORITY + CONFIG_MQTT_TASK_PRIORITY )
+#endif
+
 /** @} */
 
 /**
  * @brief Maximum number of MQTT clients that can exist simultaneously.
  */
-//#define mqttconfigMAX_BROKERS            ( 4 ) //XXX
-#define mqttconfigMAX_BROKERS            ( 2 )
+#define mqttconfigMAX_BROKERS            ( CONFIG_MQTT_MAX_BROKERS )
 
 /**
  * @brief Maximum number of parallel operations per client.
  */
-#define mqttconfigMAX_PARALLEL_OPS       ( 5 )
+#define mqttconfigMAX_PARALLEL_OPS       ( CONFIG_MQTT_MAX_PARALLEL_OPS )
 
 /**
  * @brief Time in milliseconds after which the TCP send operation should timeout.
  */
-//#define mqttconfigTCP_SEND_TIMEOUT_MS    ( 2000 )
-#define mqttconfigTCP_SEND_TIMEOUT_MS    ( 20 )
+#define mqttconfigTCP_SEND_TIMEOUT_MS    ( CONFIG_MQTT_TCP_SEND_TIMEOUT_MS )
 
 /**
  * @brief Length of the buffer used to receive data.
  */
-#define mqttconfigRX_BUFFER_SIZE         ( 1024 )
-
-/**
- * @brief The maximum time in ticks for which the MQTT task is permitted to block.
- */
-#define mqttconfigMQTT_TASK_MAX_BLOCK_TICKS    ( 100 )
+#define mqttconfigRX_BUFFER_SIZE         ( CONFIG_MQTT_RX_BUFFER_SIZE )
 
 #endif /* _AWS_MQTT_AGENT_CONFIG_H_ */

@@ -33,6 +33,7 @@
 #define _AWS_MQTT_AGENT_CONFIG_H_
 
 #include "FreeRTOS.h"
+#include "task.h"
 #include "kconfig.h"
 /**
  * @brief Controls whether or not to report usage metrics to the
