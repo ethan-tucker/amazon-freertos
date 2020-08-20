@@ -19,6 +19,24 @@ def captured_output():
     finally:
         sys.stdout, sys.stderr = old_out, old_err
 
+boards_dict = OrderedDict(
+        [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
+                        "CYW954907AEVAL1F"]),
+            ("espressif", ["esp32"]),
+            ("infineon", ["xmc4800_iotkit",
+                            "xmc4800_plus_optiga_trust_x"]),
+            ("marvell", ["mw300_rd"]),
+            ("mediatek", ["mt7697hx-dev-kit"]),
+            ("microchip", ["curiosity_pic32mzef",
+                            "ecc608a_plus_winsim"]),
+            ("nordic", ["nrf52840-dk"]),
+            ("nuvoton", ["numaker_iot_m487_wifi"]),
+            ("nxp", ["lpc54018iotmodule"]),
+            ("pc", ["linux", "windows"]),
+            ("renesas", ["rx65n-rsk"]),
+            ("st", ["stm32l475_discovery"]),
+            ("ti", ["cc3220_launchpad"]),
+            ("xilinx", ["microzed"])])
 
 class TestConfigure(unittest.TestCase):
     @mock.patch('configure.input', create=True)
@@ -35,25 +53,6 @@ class TestConfigure(unittest.TestCase):
     @mock.patch('configure.input', create=True)
     def test_boardChoiceMenu(self, mocked_input):
         mocked_input.side_effect = ['0', '15', 'e', '2', '0', '5', 'e', '1']
-
-        boards_dict = OrderedDict(
-                [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                              "CYW954907AEVAL1F"]),
-                    ("espressif", ["esp32"]),
-                    ("infineon", ["xmc4800_iotkit",
-                                  "xmc4800_plus_optiga_trust_x"]),
-                    ("marvell", ["mw300_rd"]),
-                    ("mediatek", ["mt7697hx-dev-kit"]),
-                    ("microchip", ["curiosity_pic32mzef",
-                                   "ecc608a_plus_winsim"]),
-                    ("nordic", ["nrf52840-dk"]),
-                    ("nuvoton", ["numaker_iot_m487_wifi"]),
-                    ("nxp", ["lpc54018iotmodule"]),
-                    ("pc", ["linux", "windows"]),
-                    ("renesas", ["rx65n-rsk"]),
-                    ("st", ["stm32l475_discovery"]),
-                    ("ti", ["cc3220_launchpad"]),
-                    ("xilinx", ["microzed"])])
 
         actual_output_filepath = "testOutputActual/boardChoiceMenu1"
         expected_output_filepath = "testOutputExpected/boardChoiceMenu1"
@@ -127,24 +126,6 @@ class TestConfigure(unittest.TestCase):
         thing_cert = "testing_cert"
         thing_private_key = "testing_key"
 
-        boards_dict = OrderedDict(
-                [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                              "CYW954907AEVAL1F"]),
-                    ("espressif", ["esp32"]),
-                    ("infineon", ["xmc4800_iotkit",
-                                  "xmc4800_plus_optiga_trust_x"]),
-                    ("marvell", ["mw300_rd"]),
-                    ("mediatek", ["mt7697hx-dev-kit"]),
-                    ("microchip", ["curiosity_pic32mzef",
-                                   "ecc608a_plus_winsim"]),
-                    ("nordic", ["nrf52840-dk"]),
-                    ("nuvoton", ["numaker_iot_m487_wifi"]),
-                    ("nxp", ["lpc54018iotmodule"]),
-                    ("pc", ["linux", "windows"]),
-                    ("renesas", ["rx65n-rsk"]),
-                    ("st", ["stm32l475_discovery"]),
-                    ("ti", ["cc3220_launchpad"]),
-                    ("xilinx", ["microzed"])])
         mocked_input.side_effect = ['2','1']
         # merge config to ensure test is consistent independent of the state of the 
         # .config file 
@@ -158,24 +139,6 @@ class TestConfigure(unittest.TestCase):
 
     @mock.patch('configure.input', create=True)
     def test_resetKconfig(self, mocked_input):
-        boards_dict = OrderedDict(
-                [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                              "CYW954907AEVAL1F"]),
-                    ("espressif", ["esp32"]),
-                    ("infineon", ["xmc4800_iotkit",
-                                  "xmc4800_plus_optiga_trust_x"]),
-                    ("marvell", ["mw300_rd"]),
-                    ("mediatek", ["mt7697hx-dev-kit"]),
-                    ("microchip", ["curiosity_pic32mzef",
-                                   "ecc608a_plus_winsim"]),
-                    ("nordic", ["nrf52840-dk"]),
-                    ("nuvoton", ["numaker_iot_m487_wifi"]),
-                    ("nxp", ["lpc54018iotmodule"]),
-                    ("pc", ["linux", "windows"]),
-                    ("renesas", ["rx65n-rsk"]),
-                    ("st", ["stm32l475_discovery"]),
-                    ("ti", ["cc3220_launchpad"]),
-                    ("xilinx", ["microzed"])])
         mocked_input.side_effect = ['2','1']
         # merge config to ensure test is consistent independent of the state of the 
         # .config file 
@@ -190,24 +153,6 @@ class TestConfigure(unittest.TestCase):
     # out of the kconfig gui
     @mock.patch('configure.input', create=True)
     def test_boardconfiguration(self, mocked_input):
-        boards_dict = OrderedDict(
-                [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                              "CYW954907AEVAL1F"]),
-                    ("espressif", ["esp32"]),
-                    ("infineon", ["xmc4800_iotkit",
-                                  "xmc4800_plus_optiga_trust_x"]),
-                    ("marvell", ["mw300_rd"]),
-                    ("mediatek", ["mt7697hx-dev-kit"]),
-                    ("microchip", ["curiosity_pic32mzef",
-                                   "ecc608a_plus_winsim"]),
-                    ("nordic", ["nrf52840-dk"]),
-                    ("nuvoton", ["numaker_iot_m487_wifi"]),
-                    ("nxp", ["lpc54018iotmodule"]),
-                    ("pc", ["linux", "windows"]),
-                    ("renesas", ["rx65n-rsk"]),
-                    ("st", ["stm32l475_discovery"]),
-                    ("ti", ["cc3220_launchpad"]),
-                    ("xilinx", ["microzed"])])
         thing_created = True
         iot_endpoint = "testing_endpoint"
         thing_name = "testing_thing"
