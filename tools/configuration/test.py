@@ -9,6 +9,7 @@ from collections import OrderedDict
 import os
 from shutil import copyfile
 
+
 @contextmanager
 def captured_output():
     new_out, new_err = StringIO(), StringIO()
@@ -19,16 +20,17 @@ def captured_output():
     finally:
         sys.stdout, sys.stderr = old_out, old_err
 
+
 boards_dict = OrderedDict(
         [("cypress", ["CY8CKIT_064S0S2_4343W", "CYW943907AEVAL1F",
-                        "CYW954907AEVAL1F"]),
+                      "CYW954907AEVAL1F"]),
             ("espressif", ["esp32"]),
             ("infineon", ["xmc4800_iotkit",
-                            "xmc4800_plus_optiga_trust_x"]),
+                          "xmc4800_plus_optiga_trust_x"]),
             ("marvell", ["mw300_rd"]),
             ("mediatek", ["mt7697hx-dev-kit"]),
             ("microchip", ["curiosity_pic32mzef",
-                            "ecc608a_plus_winsim"]),
+                           "ecc608a_plus_winsim"]),
             ("nordic", ["nrf52840-dk"]),
             ("nuvoton", ["numaker_iot_m487_wifi"]),
             ("nxp", ["lpc54018iotmodule"]),
@@ -38,6 +40,7 @@ boards_dict = OrderedDict(
             ("ti", ["cc3220_launchpad"]),
             ("xilinx", ["microzed"])])
 
+
 class TestConfigure(unittest.TestCase):
     @mock.patch('configure.input', create=True)
     # validate that I can enter in incorrect values and then a correct
@@ -46,7 +49,7 @@ class TestConfigure(unittest.TestCase):
         mocked_input.side_effect = ['0', '5', 'e', '2']
 
         res = configure.getValidUserInput(["Option 1", "Option 2",
-                                            "Option 3"], 3, "Choose an option")
+                                           "Option 3"], 3, "Choose an option")
 
         self.assertEqual(res, 'Option 2')
 
@@ -95,7 +98,7 @@ class TestConfigure(unittest.TestCase):
                          "/aws_demos/config_files\\mqtt_Kconfig"]
 
         KConfig_list = configure.findAllKConfigFiles("nuvoton",
-                                                       "numaker_iot_m487_wifi")
+                                                     "numaker_iot_m487_wifi")
 
         self.assertEqual(expected_list, KConfig_list)
 
@@ -113,11 +116,11 @@ class TestConfigure(unittest.TestCase):
         input_filepath = "testOutputExpected/formatFunctionInput"
         copyfile(input_filepath, "temp")
 
-        actual_output_filepath= "testOutputActual/formatFunctionActual"
-        expected_output_filepath= "testOutputExpected/formatFunctionOutput"
+        actual_output_filepath = "testOutputActual/formatFunctionActual"
+        expected_output_filepath = "testOutputExpected/formatFunctionOutput"
         configure.formatFunctionDeclarations("temp", actual_output_filepath)
-        self.assertTrue(filecmp.cmp(actual_output_filepath,expected_output_filepath), "files diff")
-
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "files diff")
 
     @mock.patch('configure.input', create=True)
     def test_updateKConfigAWSCredentials(self, mocked_input):
@@ -126,29 +129,32 @@ class TestConfigure(unittest.TestCase):
         thing_cert = "testing_cert"
         thing_private_key = "testing_key"
 
-        mocked_input.side_effect = ['2','1']
-        # merge config to ensure test is consistent independent of the state of the 
-        # .config file 
+        mocked_input.side_effect = ['2', '1']
+        # merge config to ensure test is consistent independent of the state of
+        # the .config file
         configure.boardChoiceMenu(boards_dict)
-        configure.updateKConfigAWSCredentials(iot_endpoint, iot_thing, thing_cert,
-                                              thing_private_key)
-        
-        expected_output_filepath = "testOutputExpected/updateKconfigAWSCredentials"
+        configure.updateKConfigAWSCredentials(iot_endpoint, iot_thing,
+                                              thing_cert, thing_private_key)
+
+        expected_output_filepath = ("testOutputExpected/" +
+                                    "updateKconfigAWSCredentials")
         actual_output_filepath = ".config"
-        self.assertTrue(filecmp.cmp(actual_output_filepath,expected_output_filepath), "files diff")
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "files diff")
 
     @mock.patch('configure.input', create=True)
     def test_resetKconfig(self, mocked_input):
-        mocked_input.side_effect = ['2','1']
-        # merge config to ensure test is consistent independent of the state of the 
-        # .config file 
+        mocked_input.side_effect = ['2', '1']
+        # merge config to ensure test is consistent independent of the state of
+        # the .config file
         configure.boardChoiceMenu(boards_dict)
         configure.resetKConfig()
-        
+
         expected_output_filepath = "testOutputExpected/resetKconfigOutput"
         actual_output_filepath = ".config"
-        self.assertTrue(filecmp.cmp(actual_output_filepath,expected_output_filepath), "files diff")
-    
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "files diff")
+
     # This test requires some user input. Hit save when prompted and then quit
     # out of the kconfig gui
     @mock.patch('configure.input', create=True)
@@ -159,22 +165,26 @@ class TestConfigure(unittest.TestCase):
         thing_cert = "testing_cert"
         thing_private_key = "testing_key"
         temp_config_filepath = "temp.h"
-        mocked_input.side_effect = ['2','1']
-        # merge config to ensure test is consistent independent of the state of the 
-        # .config file 
+        mocked_input.side_effect = ['2', '1']
+        # merge config to ensure test is consistent independent of the state of
+        # the .config file
         configure.boardChoiceMenu(boards_dict)
-        configure.boardConfiguration(thing_created, thing_name, iot_endpoint, thing_cert,
-                       thing_private_key, temp_config_filepath)
-        
+        configure.boardConfiguration(thing_created, thing_name, iot_endpoint,
+                                     thing_cert, thing_private_key,
+                                     temp_config_filepath)
+
         # Test the .config file was created correctly
         expected_output_filepath = "testOutputExpected/resetKconfigOutput"
         actual_output_filepath = ".config"
-        self.assertTrue(filecmp.cmp(actual_output_filepath,expected_output_filepath), "files diff")
-        
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "files diff")
+
         # Test the temp.h file was generated succesfully
-        expected_output_filepath = "testOutputExpected/boardConfigurationKconfig"
+        expected_output_filepath = ("testOutputExpected/" +
+                                    "boardConfigurationKconfig")
         actual_output_filepath = "temp.h"
-        self.assertTrue(filecmp.cmp(actual_output_filepath,expected_output_filepath), "files diff")
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "files diff")
         os.remove("temp.h")
 
     def test_loadCurrentBoardChoice(self):
@@ -226,15 +236,18 @@ class TestConfigure(unittest.TestCase):
 
         actual_output_filepath = "../aws_config_quick_start/configure.json"
         expected_output_filepath = "testOutputExpected/resetConfigJsonExpected"
-        self.assertTrue(filecmp.cmp(actual_output_filepath, expected_output_filepath), "Files diff")       
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "Files diff")
 
     def test_updateConfigJsonFile(self):
         thing_name = "testing"
         configure.updateConfigJsonFile(thing_name)
 
         actual_output_filepath = "../aws_config_quick_start/configure.json"
-        expected_output_filepath = "testOutputExpected/updateConfigJsonExpected"
-        self.assertTrue(filecmp.cmp(actual_output_filepath, expected_output_filepath), "Files diff")
+        expected_output_filepath = ("testOutputExpected/" +
+                                    "updateConfigJsonExpected")
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath), "Files diff")
         configure.resetConfigJsonFile(thing_name)
 
     def test_updatedFormat(self):
@@ -243,34 +256,40 @@ class TestConfigure(unittest.TestCase):
         actual_output_filepath = "testOutputActual/updateFormatActual"
         with open(input_filepath) as in_file:
             res = configure.updateFormat(in_file)
-        
+
         with open(actual_output_filepath, "w") as actual_output_file:
             actual_output_file.write(res)
 
-        self.assertTrue(filecmp.cmp(actual_output_filepath, expected_output_filepath))
-    
+        self.assertTrue(filecmp.cmp(actual_output_filepath,
+                                    expected_output_filepath))
+
     # This unit test will only succeed if you have run aws_configure
     @mock.patch('configure.input', create=True)
     def test_integrationTest(self, mocked_input):
-        mocked_input.side_effect = ['1', 'testing', '2', '2', '1', '3', '5', '6']
+        mocked_input.side_effect = ['1', 'testing', '2', '2', '1', '3', '5',
+                                    '6']
         configure.main()
 
         # confirm .config file updated correctly
-        expected_output_filepath = "testOutputExpected/integrationTestConfigOutput"
+        expected_output_filepath = ("testOutputExpected/" +
+                                    "integrationTestConfigOutput")
         actual_output_filepath = ".config"
-        self.assertTrue(filecmp.cmp(expected_output_filepath, actual_output_filepath), "Files diff")
-        
+        self.assertTrue(filecmp.cmp(expected_output_filepath,
+                                    actual_output_filepath), "Files diff")
+
         # confirm kconfig file generated correctly
-        expected_output_filepath = "testOutputExpected/integrationTestKConfigOutput"
+        expected_output_filepath = ("testOutputExpected/" +
+                                    "integrationTestKConfigOutput")
         actual_output_filepath = "../../build/kconfig/kconfig.h"
         with open(expected_output_filepath) as expected_output,\
              open(actual_output_filepath) as actual_output:
-                # The last three lines contain keys that will change every time the code is run
-                # Every other line should be the same
-                actual_output_text = actual_output.readlines()[:-3]
-                expected_output_text = expected_output.readlines()[:-3]
+            # The last three lines contain keys that will change every time the
+            # code is run. Every other line should be the same
+            actual_output_text = actual_output.readlines()[:-3]
+            expected_output_text = expected_output.readlines()[:-3]
 
         self.assertEqual(actual_output_text, expected_output_text)
+
 
 if __name__ == '__main__':
     unittest.main()
