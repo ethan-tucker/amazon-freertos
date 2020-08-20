@@ -1,0 +1,8 @@
+
+#
+# Board Properties
+#
+CONFIG_OTA_ENABLED=y
+CONFIG_MQTT_ENABLED=y
+CONFIG_TCP_ENABLED=y
+# end of Board Properties

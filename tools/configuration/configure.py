@@ -96,6 +96,8 @@ def boardChoiceMenu(boards_dict):
     with open("boardChoice.csv", "w") as database_file:
         database_file.write(vendor_name + "," + board)
 
+    return (vendor_name, board)
+
 
 # findAllKConfigFiles: Globs the boards directory tree for Kconfig files.
 # Globbing for files matching a pattern allows for future files to be added
@@ -117,9 +119,9 @@ def findAllKConfigFiles(vendor, board):
 # formatFunctionDeclarations: This function takes in the temp.h temporary
 # header file and formats all of the varials with the FUNC tag. The fomatted
 # file is outputted to build/kconfig/kconfig.h
-def formatFunctionDeclarations(temp_config_filepath):
+def formatFunctionDeclarations(temp_config_filepath, kconfig_build_filepath):
     with open(temp_config_filepath, "r") as config_file,\
-         open("../../build/kconfig/kconfig.h", "w") as outfile:
+         open(kconfig_build_filepath, "w") as outfile:
         for line in config_file.readlines():
 
             # find all config options that are functions
@@ -214,9 +216,9 @@ def loadCurrentBoardChoice():
     # os.path.isfile checks if a file exists. This first line is checking if
     # a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("boardChoice.csv")):
-        f = open("boardChoice.csv", "r")
-        vendor_and_board = f.read().split(",")
-        return vendor_and_board
+        with open("boardChoice.csv", "r") as f:
+            vendor_and_board = f.read().split(",")
+            return vendor_and_board
     return None
 
 
@@ -229,9 +231,9 @@ def loadCurrentThingName():
     # os.path.isfile checks if a file exists. This first line is checking if
     # a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("thingName.csv")):
-        f = open("thingName.csv", "r")
-        thing_name = f.read()
-        return thing_name
+        with open("thingName.csv", "r") as f:
+            thing_name = f.read()
+            return thing_name
     return None
 
 
@@ -430,6 +432,7 @@ def main():
               ("ti", ["cc3220_launchpad"]),
               ("xilinx", ["microzed"])])
     temp_config_filepath = "temp.h"
+    kconfig_build_filepath = "../../build/kconfig/kconfig.h"
     board_chosen = False
     thing_created = False
     thing_cert = ""
@@ -475,7 +478,8 @@ def main():
             boardConfiguration(thing_created, thing_name, iot_endpoint,
                                thing_cert, thing_private_key,
                                temp_config_filepath)
-            formatFunctionDeclarations(temp_config_filepath)
+            formatFunctionDeclarations(temp_config_filepath,
+                                       kconfig_build_filepath)
 
         # Build and flash the demo
         elif(choice == "4" and board_chosen):
