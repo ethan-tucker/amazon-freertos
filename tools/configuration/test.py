@@ -266,8 +266,8 @@ class TestConfigure(unittest.TestCase):
     # This unit test will only succeed if you have run aws_configure
     @mock.patch('configure.input', create=True)
     def test_integrationTest(self, mocked_input):
-        mocked_input.side_effect = ['1', 'testing', '2', '2', '1', '3', '5',
-                                    '6']
+        mocked_input.side_effect = ['9', '1', 'testing', '2', '2', '1', 
+                                    '3', '5', '6']
         configure.main()
 
         # confirm .config file updated correctly
