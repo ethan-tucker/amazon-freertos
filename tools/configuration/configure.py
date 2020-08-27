@@ -6,6 +6,9 @@ import sys
 from collections import OrderedDict
 import boto3
 import glob
+from pathlib import Path
+import fileinput
+from shutil import copy
 
 
 # getValidUserInput: Validates that the numbered selected the user makes is:
@@ -93,8 +96,8 @@ def boardChoiceMenu(boards_dict):
     # This is writing the users board choice out to a "database" file. This
     # keeps track of the last board the user has configured in between runs
     # of the program.
-    with open("boardChoice.csv", "w") as database_file:
-        database_file.write(vendor_name + "," + board)
+    database_file = Path("boardChoice.csv")
+    database_file.write_text(vendor_name + "," + board)
 
     return (vendor_name, board)
 
@@ -120,18 +123,21 @@ def findAllKConfigFiles(vendor, board):
 # header file and formats all of the varials with the FUNC tag. The fomatted
 # file is outputted to build/kconfig/kconfig.h
 def formatFunctionDeclarations(temp_config_filepath, kconfig_build_filepath):
-    with open(temp_config_filepath, "r") as config_file,\
-         open(kconfig_build_filepath, "w") as outfile:
-        for line in config_file.readlines():
 
-            # find all config options that are functions
+    with fileinput.FileInput(temp_config_filepath, inplace=True,
+                             backup='.bak') as config_file:
+        # find all config options that are functions
+        for line in config_file:
             if line.split(" ")[1].split("_")[-1] == 'FUNC':
                 # remove the quotations around the string value
                 line = line.replace("\"", "")
-            outfile.write(line)
+            print(line, end='')
 
+    # copy the file to the final destination
+    copy(temp_config_filepath, kconfig_build_filepath)
     # removes the temporary partially formatted header (it was only needed for
-    # this intermediary step)
+    # this intermediary step) as well as the backup
+    os.remove(temp_config_filepath + '.bak')
     os.remove(temp_config_filepath)
 
 
@@ -140,25 +146,25 @@ def formatFunctionDeclarations(temp_config_filepath, kconfig_build_filepath):
 # to enter it in manually.
 def updateKConfigAWSCredentials(iot_endpoint, thing_name, thing_cert,
                                 thing_private_key):
-    with open(".config", "r+") as config_file:
-        config_text = config_file.read()
-        config_text = config_text.replace("<THING_NAME>", thing_name)
-        config_text = config_text.replace("<IOT_ENDPOINT>", iot_endpoint)
-        config_text = config_text.replace("<THING_CERT>", thing_cert)
-        config_text = config_text.replace("<THING_PRIVATE_KEY>",
-                                          thing_private_key)
-        config_file.seek(0)
-        config_file.write(config_text)
-        config_file.truncate()
+
+    config_file = Path(".config")
+
+    config_text = config_file.read_text()
+    config_text = config_text.replace("<THING_NAME>", thing_name)
+    config_text = config_text.replace("<IOT_ENDPOINT>", iot_endpoint)
+    config_text = config_text.replace("<THING_CERT>", thing_cert)
+    config_text = config_text.replace("<THING_PRIVATE_KEY>",
+                                      thing_private_key)
+
+    config_file.write_text(config_text)
 
 
 # resetKConfig: Resets the ".config" file with the format that the
 # updateKConfigAWSCredentials expects.
 def resetKConfig():
-    updated_file = []
-    with open(".config", "r") as config_file:
-        config_text = config_file.readlines()
-        for line in config_text:
+    with fileinput.input(".config", inplace=True,
+                         backup='.bak') as config_file:
+        for line in config_file:
             if "CONFIG_IOT_ENDPOINT" in line:
                 line = 'CONFIG_IOT_ENDPOINT="<IOT_ENDPOINT>"\n'
             if "CONFIG_THING_NAME" in line:
@@ -167,10 +173,8 @@ def resetKConfig():
                 line = 'CONFIG_THING_CERT="<THING_CERT>"\n'
             if "CONFIG_THING_PRIVATE_KEY" in line:
                 line = 'CONFIG_THING_PRIVATE_KEY="<THING_PRIVATE_KEY>"\n'
-            updated_file.append(line)
-    with open(".config", "w") as reset_config_file:
-        for line in updated_file:
-            reset_config_file.write(line)
+            print(line, end='')
+    os.remove('.config.bak')
 
 
 # boardConfiguration: This function runs the kconfiglib commands guiconfig and
@@ -216,9 +220,8 @@ def loadCurrentBoardChoice():
     # os.path.isfile checks if a file exists. This first line is checking if
     # a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("boardChoice.csv")):
-        with open("boardChoice.csv", "r") as f:
-            vendor_and_board = f.read().split(",")
-            return vendor_and_board
+        vendor_and_board = Path("boardChoice.csv").read_text().split(",")
+        return vendor_and_board
     return None
 
 
@@ -231,9 +234,8 @@ def loadCurrentThingName():
     # os.path.isfile checks if a file exists. This first line is checking if
     # a boardChoice.csv file exists and if it does, read in its information
     if(os.path.isfile("thingName.csv")):
-        with open("thingName.csv", "r") as f:
-            thing_name = f.read()
-            return thing_name
+        thing_name = Path("thingName.csv").read_text()
+        return thing_name
     return None
 
 
@@ -243,28 +245,26 @@ def loadCurrentThingName():
 # windows machine.
 def buildAndFlashBoard():
     # This is currently a proof of concept with hard coded commands
-    # First the directory must be changed to the root directory
-    os.chdir("../..")
-
+    # First the directory must be changed to the root directory (this is
+    # done with the cwd argument in the subprocess.run() command)
     # Generating the build files
     print("\n-----GENERATING BUILD FILES-----\n")
     sys.stdout.flush()
     subprocess.run(["cmake", "-D", "VENDOR=espressif", "-D",
                     "BOARD=esp32_wrover_kit", "-D", "COMPILER=xtensa-esp32",
-                    "-G", "Ninja", "-S", ".", "-B", "build"])
+                    "-G", "Ninja", "-S", ".", "-B", "build"], cwd='../..')
 
     # Building the project
     print("\n-----BUILDING PROJECT-----\n")
     sys.stdout.flush()
-    subprocess.run(["cmake", "--build", "build"])
+    subprocess.run(["cmake", "--build", "build"], cwd='../..')
 
     # Flashing the board and running the demo
     print("\n-----FLASHING THE BOARD AND RUNNING THE DEMO-----\n")
     sys.stdout.flush()
     subprocess.run(["py", "vendors/espressif/esp-idf/tools/idf.py",
                     "erase_flash", "flash", "monitor", "-p", "COM3",
-                    "-B", "build"])
-    os.chdir("tools/configuration")
+                    "-B", "build"], cwd='../..')
 
 
 # cleanupResource: runs SetupAWS.py delete_prerqe which cleans up all of the
@@ -277,12 +277,11 @@ def cleanupResources(thing_name):
 
     updateConfigJsonFile(thing_name)
 
-    os.chdir("../aws_config_quick_start")
-    subprocess.run(["py", "SetupAWS.py", "delete_prereq"])
+    subprocess.run(["py", "SetupAWS.py", "delete_prereq"],
+                   cwd='../aws_config_quick_start')
 
     resetConfigJsonFile(thing_name)
 
-    os.chdir("../configuration")
     print("\n-----Completed clean up-----\n")
     os.remove("thingName.csv")
 
@@ -303,17 +302,17 @@ def provisionResources():
     # Call the SetupAWS.py script with the "kconfig_setup" command line
     # argument. This will create the thing and generate the credential files,
     # but will not attempt to update the client credential source files
-    os.chdir("../aws_config_quick_start")
-    subprocess.run(["py", "SetupAWS.py", "kconfig_setup"])
+
+    subprocess.run(["py", "SetupAWS.py", "kconfig_setup"],
+                   cwd='../aws_config_quick_start')
 
     resetConfigJsonFile(thing_name)
 
-    os.chdir("../configuration")
     print("\n-----Completed Provisioning-----\n")
 
     # write thing choice out to a file so it can persist between runs
-    with open("thingName.csv", "w") as database_file:
-        database_file.write(thing_name)
+    database_file = Path("thingName.csv")
+    database_file.write_text(thing_name)
 
     return thing_name
 
@@ -322,17 +321,15 @@ def provisionResources():
 # script expects the thing_name to be). This file is located in
 # "../aws_config_quick_start/configure.json"
 def updateConfigJsonFile(thing_name):
-    # Open with r+ to read and modify at the same time.
-    with open("../aws_config_quick_start/configure.json", "r+") as\
-              configure_json:
-        configure_text = configure_json.read()
+    configure_json = Path("../aws_config_quick_start/configure.json")
 
-        # The "$thing_name" place holder is replaced with the thing name the
-        # user entered
-        configure_text = configure_text.replace("$thing_name", thing_name)
-        configure_json.seek(0)
-        configure_json.write(configure_text)
-        configure_json.truncate()
+    configure_text = configure_json.read_text()
+
+    # The "$thing_name" place holder is replaced with the thing name the
+    # user entered
+    configure_text = configure_text.replace("$thing_name", thing_name)
+
+    configure_json.write_text(configure_text)
 
 
 # updateConfigJsonFile: Return the configure.json file to its original state so
@@ -341,16 +338,15 @@ def updateConfigJsonFile(thing_name):
 def resetConfigJsonFile(thing_name):
     # Open with r+ to read and modify at the same time. Here the thing_name
     # place holder is replaced with the thing name the user entered
-    with open("../aws_config_quick_start/configure.json", "r+") as\
-              configure_json:
-        configure_text = configure_json.read()
+    configure_json = Path("../aws_config_quick_start/configure.json")
 
-        # The thing name the user entered is replaced with the "$thing_name"
-        # placeholder so that the file is not changed from its original state.
-        configure_text = configure_text.replace(thing_name, "$thing_name")
-        configure_json.seek(0)
-        configure_json.write(configure_text)
-        configure_json.truncate()
+    configure_text = configure_json.read_text()
+
+    # The thing name the user entered is replaced with the "$thing_name"
+    # placeholder so that the file is not changed from its original state.
+    configure_text = configure_text.replace(thing_name, "$thing_name")
+
+    configure_json.write_text(configure_text)
 
 
 # getEndpoint: Returns the endpoint of the boto3 client connection the user has
@@ -437,6 +433,7 @@ def main():
     thing_created = False
     thing_cert = ""
     thing_private_key = ""
+    quit_selected = False
     iot_endpoint = getEndpoint()
 
     # loadCurrentBoardChoice() checks if the user has chosen a board in the
@@ -452,9 +449,11 @@ def main():
     thing_name = loadCurrentThingName()
     if(thing_name):
         thing_created = True
+        credential_keys = formatCredentials(thing_name)
+        thing_cert = credential_keys[0]
+        thing_private_key = credential_keys[1]
 
-    choice = ""
-    while choice != "6":
+    while quit_selected is False:
         printMainMenuOptions(board_chosen, currentBoardChoice, thing_created,
                              thing_name)
         choice = input("\nWhat do you want to do?: ")
@@ -492,7 +491,7 @@ def main():
 
         # Quit the program
         elif(choice == "6"):
-            pass
+            quit_selected = True
         else:
             print("Please choose a valid option")
 
