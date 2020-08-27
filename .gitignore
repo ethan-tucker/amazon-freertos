@@ -16,6 +16,8 @@ doxygen_warnings.txt
 *.config
 *.old
 *.vcxproj
+tools/configuration/boardChoice.csv
+tools/configuration/thingName.csv
 
 RemoteSystemsTempFiles/*
 
