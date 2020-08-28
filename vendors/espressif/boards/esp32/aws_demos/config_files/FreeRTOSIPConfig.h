@@ -1,6 +1,6 @@
 /*
  * FreeRTOS Kernel V10.2.0
- * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -52,7 +52,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #endif
 
 #if ( ipconfigHAS_DEBUG_PRINTF == 1 )
-    #define FreeRTOS_debug_printf( X )    CONFIG_IP_FREERTOS_DEBUG_PRINTF_FUNC
+    #define FreeRTOS_debug_printf( X )    configPRINTF( X )
 #endif
 
 /* Set to 1 to print out non debugging messages, for example the output of the
@@ -66,9 +66,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #endif
 
 #if ( ipconfigHAS_PRINTF == 1 )
-    #define FreeRTOS_printf( X )    CONFIG_IP_FREERTOS_PRINTF_FUNC
-	/* Allow monitoring the message queue of the IP-task. */
-	#define ipconfigCHECK_IP_QUEUE_SPACE	1
+    #define FreeRTOS_printf( X )    configPRINTF( X )
 #endif
 
 /* Define the byte order of the target MCU (the MCU FreeRTOS+TCP is executing
@@ -84,13 +82,14 @@ extern void vLoggingPrintf( const char * pcFormatString,
 /* If the network card/driver includes checksum offloading (IP/TCP/UDP checksums)
  * then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
  * stack repeating the checksum calculations. */
- #if defined( CONFIG_IP_DRIVER_INCLUDED_RX_IP_CHECKSUM )
+#if defined( CONFIG_IP_DRIVER_INCLUDED_RX_IP_CHECKSUM )
     #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM     1
 #else
     #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM     0
 #endif
 
-/* TX checksum offloading has NOT been implemented in the Wi-Fi of ESP32. */
+/* If the network driver or network hardware is calculating the IP, TCP and UDP checksums of incoming packets,
+ * and discarding packets that are found to contain invalid checksums, then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1. */
 #if defined( CONFIG_IP_DRIVER_INCLUDED_TX_IP_CHECKSUM )
     #define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM     1
 #else
@@ -104,20 +103,36 @@ extern void vLoggingPrintf( const char * pcFormatString,
 #define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME    ( CONFIG_IP_SOCK_DEFAULT_RECEIVE_BLOCK_TIME )
 #define ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME       ( CONFIG_IP_SOCK_DEFAULT_SEND_BLOCK_TIME )
 
+/* Include support for LLMNR: Link-local Multicast Name Resolution
+ * (non-Microsoft) */
+#if defined( CONFIG_IP_USE_LLMR )
+    #define ipconfigUSE_LLMNR     1
+#else
+    #define ipconfigUSE_LLMNR     0
+#endif
+
+/* Include support for NBNS: NetBIOS Name Service (Microsoft) */
+#if defined( CONFIG_IP_USE_NBNS )
+    #define ipconfigUSE_NBNS     1
+#else
+    #define ipconfigUSE_NBNS     0
+#endif
+
 /* Include support for DNS caching.  For TCP, having a small DNS cache is very
  * useful.  When a cache is present, ipconfigDNS_REQUEST_ATTEMPTS can be kept low
  * and also DNS may use small timeouts.  If a DNS reply comes in after the DNS
  * socket has been destroyed, the result will be stored into the cache.  The next
  * call to FreeRTOS_gethostbyname() will return immediately, without even creating
- * a socket.
- */
+ * a socket. */
 #if defined( CONFIG_IP_USE_DNS_CACHE )
     #define ipconfigUSE_DNS_CACHE     1
 #else
     #define ipconfigUSE_DNS_CACHE     0
 #endif
 
-#define ipconfigDNS_CACHE_ADDRESSES_PER_ENTRY      ( 6 )
+#define ipconfigDNS_CACHE_ADDRESSES_PER_ENTRY      ( CONFIG_IP_DNS_CACHE_ADDRESSES_PER_ENTRY )
+#define ipconfigDNS_CACHE_NAME_LENGTH              ( CONFIG_IP_DNS_CACHE_NAME_LENGTH )
+#define ipconfigDNS_CACHE_ENTRIES                  ( CONFIG_IP_DNS_CACHE_ENTRIES )
 #define ipconfigDNS_REQUEST_ATTEMPTS               ( CONFIG_IP_DNS_REQUEST_ATTEMPTS )
 
 /* The IP stack executes it its own task (although any application task can make
@@ -129,14 +144,14 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * FreeRTOSConfig.h, not FreeRTOSIPConfig.h. Consideration needs to be given as to
  * the priority assigned to the task executing the IP stack relative to the
  * priority assigned to tasks that use the IP stack. */
-#define ipconfigIP_TASK_PRIORITY                   ( configMAX_PRIORITIES - CONFIG_IP_TASK_PRIORITY )
+#define ipconfigIP_TASK_PRIORITY                   ( configMAX_PRIORITIES - IP_TASK_PRIORITY_DIFFERENCE )
 
 /* The size, in words (not bytes), of the stack allocated to the FreeRTOS+TCP
  * task.  This setting is less important when the FreeRTOS Win32 simulator is used
  * as the Win32 simulator only stores a fixed amount of information on the task
  * stack.  FreeRTOS includes optional stack overflow detection, see:
  * http://www.freertos.org/Stacks-and-stack-overflow-checking.html. */
-#define ipconfigIP_TASK_STACK_SIZE_WORDS           ( CONFIG_IP_TASK_STACK_SIZE_WORDS )
+#define ipconfigIP_TASK_STACK_SIZE_WORDS           ( configMINIMAL_STACK_SIZE * CONFIG_IP_TASK_STACK_SIZE_WORDS_MULTIPLIER )
 
 /* ipconfigRAND32() is called by the IP stack to generate random numbers for
  * things such as a DHCP transaction number or initial sequence number.  Random
@@ -144,7 +159,7 @@ extern void vLoggingPrintf( const char * pcFormatString,
  * own random number generation method.  For example, it might be possible to
  * generate a random number by sampling noise on an analogue input. */
 extern uint32_t ulRand();
-#define ipconfigRAND32()    IP_RAND32_FUNC
+#define ipconfigRAND32()    ulRand()
 
 /* If ipconfigUSE_NETWORK_EVENT_HOOK is set to 1 then FreeRTOS+TCP will call the
  * network event hook at the appropriate times.  If ipconfigUSE_NETWORK_EVENT_HOOK
@@ -190,8 +205,11 @@ extern uint32_t ulRand();
     #define ipconfigDHCP_REGISTER_HOSTNAME     0
 #endif
 
-#define ipconfigDHCP_USES_UNICAST                1
-
+#if defined( CONFIG_IP_DHCP_USES_UNICAST )
+    #define ipconfigDHCP_USES_UNICAST     1
+#else
+    #define ipconfigDHCP_USES_UNICAST     0
+#endif
 /* If ipconfigDHCP_USES_USER_HOOK is set to 1 then the application writer must
  * provide an implementation of the DHCP callback function,
  * xApplicationDHCPUserHook(). */
@@ -221,7 +239,6 @@ extern uint32_t ulRand();
  * required MAC address information.  ipconfigARP_CACHE_ENTRIES defines the maximum
  * number of entries that can exist in the ARP table at any one time. */
 #define ipconfigARP_CACHE_ENTRIES                 CONFIG_IP_ARP_CACHE_ENTRIES
-
 /* ARP requests that do not result in an ARP response will be re-transmitted a
  * maximum of ipconfigMAX_ARP_RETRANSMISSIONS times before the ARP request is
  * aborted. */
@@ -260,6 +277,7 @@ extern uint32_t ulRand();
  * stack.  ipconfigEVENT_QUEUE_LENGTH sets the maximum number of events that can
  * be queued for processing at any one time.  The event queue must be a minimum of
  * 5 greater than the total number of network buffers. */
+#define ipconfigEVENT_QUEUE_LENGTH                  CONFIG_IP_EVENT_QUEUE_LENGTH 
 #if CONFIG_IP_EVENT_QUEUE_LENGTH < ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS + 5
     #error "The event queue must be a minimum of 5 greater than the total number of network buffers."
 #else
@@ -305,7 +323,9 @@ extern uint32_t ulRand();
 
 /* The MTU is the maximum number of bytes the payload of a network frame can
  * contain.  For normal Ethernet V2 frames the maximum MTU is 1500.  Setting a
- * lower value can save RAM. */
+ * lower value can save RAM, depending on the buffer management scheme used.  If
+ * ipconfigCAN_FRAGMENT_OUTGOING_PACKETS is 1 then (ipconfigNETWORK_MTU - 28) must
+ * be divisible by 8. */
 #define ipconfigNETWORK_MTU                            CONFIG_IP_NETWORK_MTU
 
 /* Set ipconfigUSE_DNS to 1 to include a basic DNS client/resolver.  DNS is used
@@ -365,7 +385,7 @@ extern uint32_t ulRand();
 
 /* The windows simulator cannot really simulate MAC interrupts, and needs to
  * block occasionally to allow other tasks to run. */
-#define configWINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY    ( 20 / portTICK_PERIOD_MS )
+#define configWINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY    ( CONFIG_IP_WINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY / portTICK_PERIOD_MS )
 
 /* Advanced only: in order to access 32-bit fields in the IP packets with
  * 32-bit memory instructions, all packets will be stored 32-bit-aligned,
@@ -390,13 +410,21 @@ extern uint32_t ulRand();
  * real program memory (RAM or flash) or just has a random non-zero value. */
 #define ipconfigIS_VALID_PROG_ADDRESS( x )    ( ( x ) != NULL )
 
+/* Include support for TCP hang protection.  All sockets in a connecting or
+ * disconnecting stage will timeout after a period of non-activity. */
+#if defined( CONFIG_IP_TCP_HANG_PROTECTION )
+    #define ipconfigTCP_HANG_PROTECTION     1
+#else
+    #define ipconfigTCP_HANG_PROTECTION     0
+#endif
+#define ipconfigTCP_HANG_PROTECTION_TIME         ( CONFIG_IP_TCP_HANG_PROTECTION_TIME )
+
 /* Include support for TCP keep-alive messages. */
 #if defined( CONFIG_IP_TCP_KEEP_ALIVE )
     #define ipconfigTCP_KEEP_ALIVE     ( 1 )
 #else
     #define ipconfigTCP_KEEP_ALIVE     ( 0 )
 #endif
-
 #define ipconfigTCP_KEEP_ALIVE_INTERVAL          ( CONFIG_IP_TCP_KEEP_ALIVE_INTERVAL ) /* Seconds. */
 
 /* The socket semaphore is used to unblock the MQTT task. */
@@ -406,9 +434,35 @@ extern uint32_t ulRand();
     #define ipconfigSOCKET_HAS_USER_SEMAPHORE     ( 0 )
 #endif
 
-#define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK    ( 1 )
-#define ipconfigUSE_CALLBACKS                    ( 0 )
+#if defined( CONFIG_IP_SOCKET_HAS_USER_WAKE_CALLBACK )
+    #define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK     ( 1 )
+#else
+    #define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK     ( 0 )
+#endif
 
+#if defined( CONFIG_IP_USE_CALLBACKS )
+    #define ipconfigUSE_CALLBACKS     ( 1 )
+#else
+    #define ipconfigUSE_CALLBACKS     ( 0 )
+#endif
+
+#if defined( CONFIG_IP_ZERO_COPY_TX_DRIVERS )
+    #define ipconfigZERO_COPY_TX_DRIVER     ( 1 )
+#else
+    #define ipconfigZERO_COPY_TX_DRIVER     ( 0 )
+#endif
+
+#if defined( CONFIG_IP_ZERO_COPY_RX_DRIVERS )
+    #define ipconfigZERO_COPY_RX_DRIVER     ( 1 )
+#else
+    #define ipconfigZERO_COPY_RX_DRIVER     ( 0 )
+#endif
+
+#if defined( CONFIG_IP_USE_LINKED_RX_MESSAGES )
+    #define ipconfigUSE_LINKED_RX_MESSAGES     ( 1 )
+#else
+    #define ipconfigUSE_LINKED_RX_MESSAGES     ( 0 )
+#endif
 
 #define portINLINE                               __inline
 
