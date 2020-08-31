@@ -217,7 +217,7 @@ class TestConfigure(unittest.TestCase):
                                      temp_config_filepath)
 
         # Test the .config file was created correctly
-        expected_output_filepath = "testOutputExpected/resetKconfigOutput"
+        expected_output_filepath = "testOutputExpected/boardConfigurationConfig"
         actual_output_filepath = ".config"
         self.assertTrue(filecmp.cmp(actual_output_filepath,
                                     expected_output_filepath), "files diff")
@@ -339,8 +339,8 @@ class TestConfigure(unittest.TestCase):
              open(actual_output_filepath) as actual_output:
             # The last three lines contain keys that will change every time the
             # code is run. Every other line should be the same
-            actual_output_text = actual_output.readlines()[:-3]
-            expected_output_text = expected_output.readlines()[:-3]
+            actual_output_text = actual_output.readlines()[:-5]
+            expected_output_text = expected_output.readlines()[:-5]
 
         self.assertEqual(actual_output_text, expected_output_text)
 
