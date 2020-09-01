@@ -243,16 +243,17 @@ def loadCurrentThingName():
 # projects, and then flashes the board and runs the demo. These functions
 # are currently hard coded for the esp32 board to be built and run on a
 # windows machine.
-def buildAndFlashBoard():
+def buildAndFlashBoard(vendor_name, board_name, compiler, build_system):
     # This is currently a proof of concept with hard coded commands
     # First the directory must be changed to the root directory (this is
     # done with the cwd argument in the subprocess.run() command)
     # Generating the build files
     print("\n-----GENERATING BUILD FILES-----\n")
     sys.stdout.flush()
-    subprocess.run(["cmake", "-D", "VENDOR=espressif", "-D",
-                    "BOARD=esp32_wrover_kit", "-D", "COMPILER=xtensa-esp32",
-                    "-G", "Ninja", "-S", ".", "-B", "build"], cwd='../..')
+    subprocess.run(["cmake", "-D", "VENDOR=" + vendor_name, "-D",
+                    "BOARD=" + board_name, "-D", "COMPILER=" + compiler,
+                    "-G", build_system, "-S", ".", "-B", "build"],
+                    cwd='../..')
 
     # Building the project
     print("\n-----BUILDING PROJECT-----\n")
@@ -390,6 +391,39 @@ def formatCredentials(thing_name):
                 updateFormat(private_key_pem_file))
 
 
+def chooseCompiler(thing_name, compiler_options):
+    print("\n-----CHOOSE A COMPILER OPTION-----\n")
+
+    # vendors in a list of touples. The first item in each touple is the vendor
+    # and the second item is a list of boards corresponding to that vendor
+    options = compiler_options[thing_name]
+    for idx, option in enumerate(options, start=1):
+        print("%s) %s" % (idx, option))
+
+    return getValidUserInput(compiler_options[thing_name],
+                             len(compiler_options[thing_name]),
+                             "Select your compiler option")
+
+
+def chooseBuildSystem(build_options):
+    print("\n-----CHOOSE A BUILD SYSTEM OPTION-----\n")
+
+    # vendors in a list of touples. The first item in each touple is the vendor
+    # and the second item is a list of boards corresponding to that vendor
+    for idx, option in enumerate(build_options, start=1):
+        print("%s) %s" % (idx, option))
+
+    return getValidUserInput(build_options,
+                             len(build_options),
+                             "Select your build system option")
+
+
+def convertBoardName(board_name, name_conversions):
+    if board_name in name_conversions:
+        board_name = name_conversions[board_name]
+    return board_name
+
+
 # printMainMenuOptions: Simply prints the options for the main menu. Abstracted
 # to make the main code more readable
 def printMainMenuOptions(board_chosen, currentBoardChoice, thing_created,
@@ -427,6 +461,36 @@ def main():
               ("st", ["stm32l475_discovery"]),
               ("ti", ["cc3220_launchpad"]),
               ("xilinx", ["microzed"])])
+
+    # This dictionary contains the copmiler options for each board
+    # it current only contains one option for the esp32 board
+    compiler_options = {
+             "CY8CKIT_064S0S2_4343W" : ["NA"],
+              "CYW943907AEVAL1F" : ["NA"],
+              "CYW954907AEVAL1F" : ["NA"],
+              "esp32" : ["xtensa-esp32"],
+              "xmc4800_iotkit" : ["NA"],
+              "xmc4800_plus_optiga_trust_x" : ["NA"],
+              "mw300_rd" : ["NA"],
+              "mt7697hx-dev-kit" : ["NA"],
+              "curiosity_pic32mzef" : ["NA"],
+              "ecc608a_plus_winsim" : ["NA"],
+              "nrf52840-dk" : ["NA"],
+              "numaker_iot_m487_wifi" : ["NA"],
+              "lpc54018iotmodule" : ["NA"],
+              "linux" : ["NA"],
+              "windows" : ["NA"],
+              "rx65n-rsk" : ["NA"],
+              "stm32l475_discovery" : ["NA"],
+              "cc3220_launchpad" : ["NA"],
+              "microzed" : ["NA"]}
+    
+    # certain boards are named differently in the afr repo and the build
+    # commands. These names must be converted 
+    name_conversions = {
+                "esp32" : "esp32_wrover_kit"}
+
+    build_system_options = ["Ninja", "make"]
     temp_config_filepath = "temp.h"
     kconfig_build_filepath = "../../build/kconfig/kconfig.h"
     board_chosen = False
@@ -482,11 +546,18 @@ def main():
 
         # Build and flash the demo
         elif(choice == "4" and board_chosen):
-            buildAndFlashBoard()
+            board_name = convertBoardName(currentBoardChoice[1],
+                                          name_conversions)
+            compiler =\
+                chooseCompiler(currentBoardChoice[1], compiler_options)
+            build_system =\
+                chooseBuildSystem(build_system_options)
+            buildAndFlashBoard(currentBoardChoice[0], board_name,
+                               compiler, build_system)
 
         # Cleanup the AWS resources
         elif(choice == "5" and thing_created):
-            cleanupResources(thing_name)
+            cleanupResources(thing_name, compiler_options)
             thing_created = False
 
         # Quit the program
