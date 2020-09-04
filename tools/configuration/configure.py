@@ -74,7 +74,7 @@ def boardChoiceMenu(boards_dict):
     boards = vendor[1]
     board = getBoardChoice(boards)
 
-    command = ["py", "merge_config.py", "KConfig", ".config"]
+    command = ["python3", "merge_config.py", "KConfig", ".config"]
 
     config_files = findAllKConfigFiles(vendor_name, board)
     for file in config_files:
@@ -263,7 +263,7 @@ def buildAndFlashBoard(vendor_name, board_name, compiler, build_system):
     # Flashing the board and running the demo
     print("\n-----FLASHING THE BOARD AND RUNNING THE DEMO-----\n")
     sys.stdout.flush()
-    subprocess.run(["py", "vendors/espressif/esp-idf/tools/idf.py",
+    subprocess.run(["python3", "vendors/espressif/esp-idf/tools/idf.py",
                     "erase_flash", "flash", "monitor", "-p", "COM3",
                     "-B", "build"], cwd='../..')
 
@@ -278,7 +278,7 @@ def cleanupResources(thing_name):
 
     updateConfigJsonFile(thing_name)
 
-    subprocess.run(["py", "SetupAWS.py", "delete_prereq"],
+    subprocess.run(["python3", "SetupAWS.py", "delete_prereq"],
                    cwd='../aws_config_quick_start')
 
     resetConfigJsonFile(thing_name)
@@ -304,7 +304,7 @@ def provisionResources():
     # argument. This will create the thing and generate the credential files,
     # but will not attempt to update the client credential source files
 
-    subprocess.run(["py", "SetupAWS.py", "kconfig_setup"],
+    subprocess.run(["python3", "SetupAWS.py", "kconfig_setup"],
                    cwd='../aws_config_quick_start')
 
     resetConfigJsonFile(thing_name)
