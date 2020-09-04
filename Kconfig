@@ -1,0 +1,102 @@
+#Displays the board options and loads the board configurations for the chosen board
+choice TARGET_BOARD
+    bool "Select the target board"
+    source "vendors/*/boards_Kconfig"
+endchoice
+
+
+menu "Library configurations"
+
+#Sources the boolean variables to keep track of what library variables have been defined
+#at the demo, board, and libary level
+source "libraries/*/*/*/def_KConfig"
+
+#Sources the library configuration file, which first sources configurations for the library for the selected board
+source "libraries/*/*/*/KConfig"
+
+config TCP_ENABLED
+    bool "Enable TCP Library"
+    default y
+    depends on TCP_SUPPORTED
+    help
+        Choose to enable the TCP library and its configurations.
+
+endmenu
+
+menu "WiFi configuration"
+depends on WIFI_ENABLED
+
+config WIFI_SSID
+    string "WiFi SSID"
+    help
+        The SSID of your wifi router.
+
+config WIFI_PASSWORD
+    string "WiFi password"
+    help
+        The password of your wifi router.
+
+choice WIFI_SECURITY
+bool "Select your wifi security type"
+
+config WIFI_SECURITY_OPEN
+    bool "Wifi security type open"
+
+config WIFI_SECURITY_WEP
+    bool "Wifi security type wep"
+
+config WIFI_SECURITY_WPA
+    bool "Wifi security type wpa"
+
+config WIFI_SECURITY_WPA2
+    bool "Wifi security type wpa2"
+
+endchoice
+endmenu
+
+menu "Ethernet configuration"
+depends on !WIFI_ENABLED
+    config NETWORK_INTERFACE
+        int "Network interface to use for ethernet"
+        default 1
+endmenu
+
+menu "AWS configuration"
+
+config IOT_ENDPOINT
+    string "AWS IoT endpoint"
+    help
+        The endpoint associated with your aws account.
+
+config THING_NAME
+    string "AWS Thing name"
+    help
+        The endpoint associated with your aws account.
+
+config THING_CERT
+    string "Thing certificate"
+    help
+        The certificate associated with your registered thing.
+
+config THING_PRIVATE_KEY
+    string "Thing private key"
+    help
+        The private key associated with your registered thing.
+
+endmenu
+
+choice "Demo Selection"
+    bool "Select a demo to enable"
+    
+    config MQTT_DEMO_ENABLED
+        bool "MQTT demo"
+        depends on MQTT_ENABLED
+
+    config SHADOW_DEMO_ENABLED
+        bool "Shadow demo"
+        depends on MQTT_ENABLED
+
+    config OTA_DEMO_ENABLED
+        bool "OTA update demo"
+        depends on OTA_ENABLED
+endchoice

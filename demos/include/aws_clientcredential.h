@@ -26,19 +26,20 @@
 #ifndef __AWS_CLIENTCREDENTIAL__H__
 #define __AWS_CLIENTCREDENTIAL__H__
 
+#include "kconfig.h"
 /*
  * @brief MQTT Broker endpoint.
  *
  * @todo Set this to the fully-qualified DNS name of your MQTT broker.
  */
-#define clientcredentialMQTT_BROKER_ENDPOINT         ""
+#define clientcredentialMQTT_BROKER_ENDPOINT         CONFIG_IOT_ENDPOINT
 
 /*
  * @brief Host name.
  *
  * @todo Set this to the unique name of your IoT Thing.
  */
-#define clientcredentialIOT_THING_NAME               ""
+#define clientcredentialIOT_THING_NAME               CONFIG_THING_NAME
 
 /*
  * @brief Port number the MQTT broker is using.
@@ -55,13 +56,13 @@
  *
  * @todo If you are using Wi-Fi, set this to your network name.
  */
-#define clientcredentialWIFI_SSID                    ""
+#define clientcredentialWIFI_SSID                    CONFIG_WIFI_SSID
 
 /*
  * @brief Password needed to join Wi-Fi network.
  * @todo If you are using WPA, set this to your network password.
  */
-#define clientcredentialWIFI_PASSWORD                ""
+#define clientcredentialWIFI_PASSWORD                CONFIG_WIFI_PASSWORD
 
 /*
  * @brief Wi-Fi network security type.
@@ -71,6 +72,14 @@
  * @note Possible values are eWiFiSecurityOpen, eWiFiSecurityWEP, eWiFiSecurityWPA,
  * eWiFiSecurityWPA2 (depending on the support of your device Wi-Fi radio).
  */
-#define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA2
+#if defined(CONFIG_WIFI_SECURITY_OPEN)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityOpen
+#elif defined(CONFIG_WIFI_SECURITY_WEP)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWEP
+#elif defined(CONFIG_WIFI_SECURITY_WPA)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA
+#elif defined(CONFIG_WIFI_SECURITY_WPA2)
+    #define clientcredentialWIFI_SECURITY                eWiFiSecurityWPA2
+#endif
 
 #endif /* ifndef __AWS_CLIENTCREDENTIAL__H__ */

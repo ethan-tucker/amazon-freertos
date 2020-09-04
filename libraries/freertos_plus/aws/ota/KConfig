@@ -1,0 +1,85 @@
+if OTA_ENABLED
+
+menu "OTA library configuration options"
+
+config OTA_STACK_SIZE
+    int "Stack size"
+
+config OTA_LOG2_FILE_BLOCK_SIZE
+    int "Log 2 file block size"
+    default 10
+
+config OTA_SELF_TEST_RESPONSE_WAIT_MS
+    int "Self test response wait (milliseconds)"
+    default 16000
+
+config OTA_FILE_REQUEST_WAIT_MS
+    int "File request wait (milliseconds)"
+    default 10000
+
+config OTA_AGENT_PRIORITY
+    int "OTA agent priority"
+    default 0
+    help
+        0 is the lowest priority.
+
+config OTA_MAX_THINGNAME_LEN
+    int "Max thingname length"
+    default 64
+
+config OTA_MAX_NUM_BLOCKS_REQUEST
+    int "Max num of blocks requested"
+    default 1
+
+config OTA_MAX_NUM_REQUEST_MOMENTUM
+    int "Max num request momentum"
+    default 32
+
+config OTA_MAX_NUM_OTA_DATA_BUFFERS
+    int "Max num OTA data buffers"
+    default 4
+
+config OTA_ALLOW_DOWNGRADE
+    bool "Allow downgrades"
+
+choice ENABLED_CONTROL_PROTOCOLS
+    bool "Enabled control protocols" 
+
+    config OTA_ENABLED_CONTROL_PROTOCOLS_MQTT
+        bool "OTA data over MQTT"
+        
+
+    config OTA_ENABLED_CONTROL_PROTOCOLS_HTTP
+        bool "OTA data over HTTP"
+
+    config OTA_ENABLED_CONTROL_PROTOCOLS_HTTP_AND_MQTT
+        bool "OTA data over HTTP and MQTT"
+endchoice
+
+choice ENABLED_DATA_PROTOCOLS
+    bool "Enabled data protocols"
+
+    config OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT
+        bool "OTA data over HTTP and MQTT"
+
+    config OTA_ENABLED_DATA_PROTOCOLS_HTTP
+        bool "OTA data over HTTP"
+
+    config OTA_ENABLED_DATA_PROTOCOLS_MQTT
+        bool "OTA data over MQTT"
+
+endchoice
+
+choice PRIMARY_DATA_PROTOCOL
+    bool "Select a primary data protocol"
+
+    config OTA_PRIMARY_DATA_PROTOCOLS_MQTT
+        bool "MQTT as primary data protocol"
+        depends on (OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || OTA_ENABLED_DATA_PROTOCOLS_MQTT)
+
+    config OTA_PRIMARY_DATA_PROTOCOLS_HTTP
+        bool "HTTP as primary data protocol"
+        depends on (OTA_ENABLED_DATA_PROTOCOLS_HTTP_AND_MQTT || OTA_ENABLED_DATA_PROTOCOLS_HTTP)
+endchoice
+endmenu
+endif

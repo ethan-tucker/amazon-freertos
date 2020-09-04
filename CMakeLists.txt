@@ -13,6 +13,9 @@ set(PROJECT_VERSION_MINOR "00")
 # Import global configurations.
 include("tools/cmake/afr.cmake")
 
+# Include kconfig configuration file
+include_directories("${CMAKE_BINARY_DIR}/kconfig")
+
 # Add 3rdparty modules.
 if (NOT AFR_ENABLE_UNIT_TESTS)
     add_subdirectory("libraries/3rdparty")
@@ -98,7 +101,6 @@ endif()
 # -------------------------------------------------------------------------------------------------
 # Do not prefix the output library file.
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
-
 
 # Initialize all modules.
 add_subdirectory("libraries")

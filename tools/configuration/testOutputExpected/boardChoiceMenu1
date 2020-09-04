@@ -1,0 +1,26 @@
+-----CHOOSE A VENDOR-----
+
+1) cypress
+2) espressif
+3) infineon
+4) marvell
+5) mediatek
+6) microchip
+7) nordic
+8) nuvoton
+9) nxp
+10) pc
+11) renesas
+12) st
+13) ti
+14) xilinx
+
+-----CHOOSE A BOARD-----
+
+1) esp32
+
+-----YOUR BOARD CHOICE-----
+
+Your choice was the espressif esp32
+
+-----MERGING CONFIGURATIONS FOR YOUR BOARD-----

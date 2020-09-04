@@ -1,0 +1,344 @@
+if TCP_ENABLED
+    menu "TCP library configuration options"
+
+        menu "Constants affecting the TCP/IP task execution behavior"
+            config IP_TASK_PRIORITY_DIFFERENCE
+                int "IP task priority"
+                help
+                    The priority is a standard FreeRTOS task priority. 
+                    The task priority is (configMAX_PRIORITIES - <user entered value>).
+                    The larger the user entered value the lower the priority.
+
+
+            config IP_TASK_STACK_SIZE_WORDS_MULTIPLIER
+                int "IP Task size words"
+                help
+                    The task stack size in words is (configMINIMAL_STACK_SIZE * <user entered value>).
+
+            config IP_USE_NETWORK_EVENT_HOOK
+                bool "Use network event hook"
+
+            config IP_EVENT_QUEUE_LENGTH
+                int "Event queue length"
+                help
+                    Must be at least NUM_NETWORK_BUFFER_DESCRIPTORS + 5
+        endmenu
+
+        menu "Debug, trace, and logging settings"
+            config IP_HAS_DEBUG_PRINTF
+                bool "Has debug printf"
+
+            config IP_FREERTOS_DEBUG_PRINTF_FUNC
+                string "FreeRTOS debub printf"
+                depends on IP_HAS_DEBUG_PRINTF
+
+            config IP_HAS_PRINTF
+                bool "Has printf"
+
+            config IP_FREERTOS_PRINTF_FUNC
+                string "FreeRTOS printf"
+                depends on IP_HAS_PRINTF
+
+            config IP_TCP_MAY_LOG_PORT_FUNC
+                string "TCP may log port"
+                default "TCP_MAY_LOG_PORT(xPort) ( ( xPort ) != 23U )"
+
+            config IP_CHECK_IP_QUEUE_SPACE
+                bool "Check IP queue space"
+                default n
+
+            config IP_WATCHDOG_TIMER_FUNC
+                string
+                default ""
+        endmenu
+
+        menu "Hardware and Driver Specific Settings"
+            choice BYTE_ORDER
+                bool "Byte order"
+
+                config IP_pdFREERTOS_BIG_ENDIAN
+                    bool "FreeRTOS big endian"
+
+                config IP_pdFREERTOS_LITTLE_ENDIAN
+                    bool "FreeRTOS little endian"
+        
+            endchoice
+
+            config IP_DRIVER_INCLUDED_TX_IP_CHECKSUM
+                bool "Driver included tx ip checksum"
+                default n
+
+            config IP_DRIVER_INCLUDED_RX_IP_CHECKSUM
+                bool "Driver included rx ip checksum"
+                default n
+
+            config IP_ETHERNET_DRIVER_FILTERS_FRAME_TYPES
+                bool "Ethernet driver filters frame types"
+                default n
+
+            config IP_WINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY
+                int "Windows/Mac interrupt simulator delay"
+                default 20
+
+            config IP_ETHERNET_DRIVER_FILTERS_PACKETS
+                bool "Ethernt driver filters packets"
+                default n
+
+            config IP_NETWORK_MTU
+                int "Network MTU"
+                default 1500
+                range 46 1500
+
+            config IP_NUM_NETWORK_BUFFER_DESCRIPTORS
+                int "Num network buffer descriptors"
+                default 45
+
+            config IP_FILTER_OUT_NON_ETHERNET_II_FRAMES
+                bool "Filets out non ethernet II frames"
+                default y
+
+            config IP_USE_LINKED_RX_MESSAGES
+                bool "Use linked RX messages"
+                default 0
+            
+            config IP_ZERO_COPY_TX_DRIVERS
+                bool "Zero copy TX drivers"
+                default 0
+
+            config IP_ZERO_COPY_RX_DRIVERS
+                bool "Zero copy RX drivers"
+                default 0
+                
+
+            config IP_BUFFER_PADDING
+                int "Buffer padding"
+                default 0
+
+            config IP_PACKET_FILLING_SIZE
+                int "Packet filling size"
+                default 2
+        endmenu
+
+        menu "TCP specific constants"
+
+            config IP_USE_TCP
+                bool "Use TCP"
+                default y
+            
+            if IP_USE_TCP
+                config IP_USE_TCP_WIN
+                    bool "Use TCP win"
+                    default y
+
+                config IP_TCP_WIN_SEG_COUNT
+                    int "TCP win seg count"
+                    default 256
+                    depends on IP_USE_TCP_WIN
+                
+                config IP_IGNORE_UNKNOWN_PACKETS
+                    bool "Ignore unkown packets"
+                    default n
+            
+            endif
+
+            config IP_TCP_TIME_TO_LIVE
+                int "TCP time to live"
+                default 128
+
+            config IP_TCP_RX_BUFFER_LENGTH
+                int "TCP RX buffer length"
+
+            config IP_TCP_TX_BUFFER_LENGTH
+                int "TCP TX buffer length"
+
+            config IP_USE_TCP_TIMSTAMPS
+                bool "Use TCP timestamps"
+
+            config IP_TCP_MSS
+                int "TCP MSS"
+
+            config IP_TCP_KEEP_ALIVE
+                bool "TCP keep alive"
+                default n
+
+            config IP_TCP_KEEP_ALIVE_INTERVAL
+                int "TCP keep alive interval"
+                depends on IP_TCP_KEEP_ALIVE
+                help
+                    Value entered is in seconds.
+
+            config IP_TCP_HANG_PROTECTION
+                bool "TCP hang protection"
+                default y
+
+            config IP_TCP_HANG_PROTECTION_TIME
+                int "TCP hang protection time"
+                default 30
+                depends on TCP_HANG_PROTECTION
+                help
+                    Value enetered is in seconds.
+
+        endmenu
+
+        menu "UDP Specific Constants"
+            config IP_UDP_TIME_TO_LIVE
+                int "UDP time to live"
+                default 128
+
+            config IP_UDP_MAX_SEND_BLOCK_TIME_TICKS
+                int "UDP max send block time ticks"
+                help
+                    Value entered is in milliseconds.
+
+            config IP_UDP_MAX_RX_PACKETS
+                int "UDP max rx packets"
+                default 0
+        endmenu
+
+        menu "Other constants effecting socket behavior"
+            config IP_INCLUDE_FULL_INET_ADDR
+                bool "Include full inet addr"
+                default y
+
+            config IP_ALLOW_SOCKET_SEND_WITHOUT_BIND
+                bool "Allow socket send without bind"
+                default y
+
+            config IP_SOCK_DEFAULT_RECEIVE_BLOCK_TIME
+                int "Socket default receive block time"
+
+            config IP_SOCK_DEFAULT_SEND_BLOCK_TIME
+                int "Socket default send block time"
+
+            config IP_SOCKET_HAS_USER_SEMAPHORE
+                bool "Socket has user semaphore"
+                default n
+
+            config IP_SOCKET_HAS_USER_WAKE_CALLBACK
+                bool "Socket has user wake callback"
+
+            config IP_USE_CALLBACKS
+                bool "Use Callbacks"
+
+            config IP_SUPPORT_SINGALS
+                bool "Support signals"
+                default n
+
+            config IP_SUPPORT_SELECT_FUNCTION
+                bool "Support select function"
+                default n
+        endmenu
+
+        menu "Constants affecting the ARP behavior"
+            config IP_ARP_CACHE_ENTRIES
+                int "ARP cache entries"
+                default 10
+
+            config IP_MAX_ARP_RETRANSMISSIONS
+                int "Max ARP retransmissions"
+                default 5
+
+            config IP_MAX_ARP_AGE
+                int "Max ARP age"
+                default 150
+                help 
+                    Value is in 10s of seconds
+
+            config IP_ARP_REVERSED_LOOKUP
+                bool "ARP reversed lookup"
+                default n
+
+            config IP_ARP_STORES_REMOTE_ADDRESSES
+                bool "ARP stores remote addresses"
+                default n
+
+            config IP_USE_ARP_REVERSED_LOOKUP
+                bool "Use ARP reversed lookup"
+                default n
+
+            config IP_USE_ARP_REMOVE_ENTRY
+                bool "Use ARP remove entry"
+                default n
+        endmenu
+
+        menu "Constants affecting DHCP and name service behavior"
+            config IP_USE_DNS
+                bool "Use DNS"
+                default y
+
+            if IP_USE_DNS
+                config IP_USE_LLMR
+                    bool "Use LLMR"
+                    default n
+
+                config IP_USE_NBNS
+                    bool "Use NBNS"
+                    default n
+            endif
+
+            config IP_USE_DNS_CACHE
+                bool "Use DNS cache"
+                default y
+
+            if IP_USE_DNS_CACHE
+                config IP_DNS_CACHE_ENTRIES
+                    int "DNS cache entries"
+
+                config IP_DNS_CACHE_ADDRESSES_PER_ENTRY
+                    int "DNS cache addresses per entry"
+
+                config IP_DNS_CACHE_NAME_LENGTH
+                    int "DNS cache name length"
+                    default 254
+            endif
+
+            config IP_DNS_REQUEST_ATTEMPTS
+                int "DNS request attempts"
+                default 5
+
+            config IP_USE_DHCP
+                bool "Use DHCP"
+                default y
+
+            config IP_MAXIMUM_DISCOVER_TX_PERIOD
+                int "Maximum discover TX period"
+                help
+                    Value entered in ticks.
+
+            config IP_USE_DHCP_HOOK
+                bool "Use DHCP hook"
+                default n
+
+            config IP_DHCP_USES_UNICAST
+                bool "DHCP uses unicast"
+                default y
+
+            config IP_DHCP_REGISTER_HOSTNAME
+                bool "DHCP register hostname"
+                default n
+        endmenu
+
+        menu "Constants affecting IP and ICMP behavior"
+            config IP_CAN_FRAGMENT_OUTGOING_PACKETS
+                bool "Can fragment outgoing packets"
+
+            config IP_REPLY_TO_INCOMING_PINGS
+                bool "Reply to incoming pings"
+                default y
+            
+            config IP_SUPPORT_OUTGOING_PINGS
+                bool "Support outgoing pings"
+                default n
+        endmenu
+
+        menu "Constants providing target support"
+            config IP_RAND32_FUNC
+                string "Rand32"
+                default "rand()"
+
+            config IP_HAS_INLINE_FUNCTIONS
+                bool "Has inline functions"
+                default y
+        endmenu
+    endmenu
+endif
